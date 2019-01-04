@@ -1,0 +1,14 @@
+
+body {
+    margin: 0;
+}
+
+body * {
+    font-family: 'Roboto', sans-serif;
+}
+
+h1 {
+    font-family: 'Permanent Marker', cursive;
+    font-size: 52px;
+    margin: 0;
+}
