@@ -1,20 +1,20 @@
 #grid-container {
     display: grid;
     padding: 10px;
-    max-width: 1600px;
+    max-width: 1400px;
     margin: 0 auto;
     grid-template-areas: 'side' 'content';
 }
 
 @media only screen and (min-width: 600px) {
     #grid-container {
-        grid-template-areas: 'side content content content';
+        grid-template-areas: 'side content content content content content';
     }
 }
 
 @media only screen and (min-width: 800px) {
     #grid-container {
-        grid-template-areas: 'side content content content';
+        grid-template-areas: 'side content content content content content';
     }
     .content {
         grid-template-columns: auto auto;
@@ -34,10 +34,6 @@
 
 .content {
     grid-area: content;
-    background-color: rgba(255, 255, 255, 0.95);
-    text-align: center;
-    font-size: 40px;
-    font-weight: bold;
     display: grid;
     padding: 0px;
 }
@@ -46,10 +42,7 @@
     background-color: rgba(255, 255, 255, 0.95);
     margin: 5px;
     border: 1px solid black;
-    text-align: center;
-    padding: 100px;
-    font-size: 40px;
-    font-weight: bold;
+    font-size: 20px;
 }
 
 #header {
@@ -73,7 +66,7 @@
 
 body {
     position: relative;
-    padding-bottom: 6rem;
+    padding-bottom: 4rem;
 }
 
 body * {
