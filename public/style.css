@@ -25,6 +25,10 @@ h1 {
     box-shadow: 5px 5px 50px #000;
 }
 
+.grid-item a {
+    color: white;
+}
+
 .grid-item:hover {
     text-decoration: underline;
 }

@@ -35,6 +35,14 @@ const MOCK_TRIPS = [
     }
 ];
 
+function editTrip(tripId) {
+    console.log(`Editing ${tripId}`);
+}
+
+function deleteTrip(tripId) {
+    console.log(`Deleting ${tripId}`);
+}
+
 function displayTrips() {
     MOCK_TRIPS.forEach(trip => {
         $('.content').append(`
@@ -42,7 +50,9 @@ function displayTrips() {
             <div class="trip-content">
                 <span class="trip-name">${trip.name}</span><br>
                 <span class="trip-location">${trip.location}</span><br>
-                <span class="trip-dates">${trip.startDate} - ${trip.endDate}</span>
+                <span class="trip-dates">${trip.startDate} - ${trip.endDate}</span><br>
+                <button class="js-edit-trip" data="${trip.id}">Edit</button>
+                <button class="js-delete-trip" data="${trip.id}">Delete</button>
             </div>
         </div>
         `);
@@ -50,4 +60,16 @@ function displayTrips() {
     });
 }
 
-$(displayTrips);
+function eventListener() {
+    displayTrips();
+    $('.content').on('click', '.js-edit-trip', function(event) {
+        event.preventDefault();
+        editTrip($(this).attr('data'));
+    });
+    $('.content').on('click', '.js-delete-trip', function(event) {
+        event.preventDefault();
+        deleteTrip($(this).attr('data'));
+    });
+}
+
+$(eventListener);

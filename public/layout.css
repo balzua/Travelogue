@@ -3,26 +3,26 @@
     padding: 10px;
     max-width: 1400px;
     margin: 0 auto;
-    grid-template-areas: 'side' 'content';
+    grid-template-areas: 'head' 'content';
 }
 
 @media only screen and (min-width: 600px) {
     #grid-container {
-        grid-template-areas: 'side content content content content content';
+        grid-template-areas: 'head' 'content';
     }
 }
 
 @media only screen and (min-width: 800px) {
     #grid-container {
-        grid-template-areas: 'side content content content content content';
+        grid-template-areas: 'head' 'content';
     }
     .content {
         grid-template-columns: auto auto;
     }
 }
 
-.sidebar {
-    grid-area: side;
+.header {
+    grid-area: head;
     background-color: rgba(255, 255, 255, 0.95);
     margin: 5px;
     border: 1px solid black;
