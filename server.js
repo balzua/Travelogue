@@ -1,7 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const mongoose = require('mongoose');
-const tripRouter = require('trips/router');
+const tripRouter = require('./trips/router');
 
 //Mongoose promise fix
 mongoose.Promise = global.Promise;

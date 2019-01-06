@@ -23,6 +23,9 @@ const TripSchema = mongoose.Schema({
         type: String,
         default: ''
     },
-    events: [eventSchema]
+    //events: [eventSchema]
 });
 
+const Trip = mongoose.model('Trip', TripSchema);
+
+module.exports = {Trip};
