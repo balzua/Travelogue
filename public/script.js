@@ -35,6 +35,10 @@ const MOCK_TRIPS = [
     }
 ];
 
+function displayTripDetails(tripId) {
+    $('.content').html('');
+}
+
 function displayEditTrip(tripId) {
     $(`.trip-content[data=${tripId}]`).html(`
     <form id="js-trip-edit-form" data="${tripId}">
@@ -44,6 +48,24 @@ function displayEditTrip(tripId) {
         <input type="submit">
     </form>
     `);
+}
+
+function displayAddForm() {
+    $('.options').append(`
+    <form id="js-trip-add-form">
+        <input type="text" placeholder="Trip Name"><br>
+        <input type="text" placeholder="Location(s)"><br>
+        <input type="datetime" value="Start Date"><input type="datetime" value="End Date"><br>
+        <input type="text" value="Image URL"><br>
+        <input type="submit">
+    </form>
+    `);
+}
+
+function addTrip() {
+    console.log(`Adding Trip`);
+    //Add Trip
+
 }
 
 function editTrip(tripId) {
@@ -85,10 +107,18 @@ function eventListener() {
         event.preventDefault();
         deleteTrip($(this).parent().attr('data'));
     });
+    $('.options').on('click', '.add-trip', function(event) {
+        event.preventDefault();
+        displayAddForm();
+    })
     $('.content').on('submit', '#js-trip-edit-form', function(event) {
         event.preventDefault();
         editTrip($(this).parent().attr('data'));
-    })
+    });
+    $('.content').on('submit', '#js-trip-add-form', function(event) {
+        event.preventDefault();
+        addTrip();
+    });
 }
 
 $(eventListener);
