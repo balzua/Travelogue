@@ -1,21 +1,39 @@
 const express = require('express');
+const morgan = require('morgan');
+const mongoose = require('mongoose');
+const tripRouter = require('trips/router');
+
+//Mongoose promise fix
+mongoose.Promise = global.Promise;
+
+//Important configuration information
+const {PORT, DATABASE_URL} = require('./config');
+
+//Express app, logging middleware, static asset middleware
 const app = express();
+app.use(morgan('common'));
 app.use(express.static('public'));
-
-
 let server;
 
-function runServer() {
-    const port = process.env.PORT || 8080;
-    return new Promise((resolve, reject) => {
-      server = app.listen(port, () => {
-        console.log(`Your app is listening on port ${port}`);
-        resolve(server);
-      })
-      .on('error', err => {
-        reject(err);
-      });
+//Routers
+app.use('/trips', tripRouter);
+
+function runServer(databaseUrl, port=PORT) {
+  return new Promise((resolve, reject) => {
+    mongoose.connect(databaseUrl, err => {
+        if (err) {
+            return reject(err);
+        }
+        server = app.listen(port, () => {
+            console.log(`Your app is listening on port ${port}`);
+            resolve(server);
+        })
+        .on('error', err => {
+            mongoose.disconnect();
+            reject(err);
+        });
     });
+});
 }
 
 function closeServer() {
@@ -33,7 +51,7 @@ function closeServer() {
 }
 
 if (require.main === module) {
-    runServer().catch(err => console.error(err));
+    runServer(DATABASE_URL).catch(err => console.error(err));
 };
 
 module.exports = { runServer, app, closeServer };
