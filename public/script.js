@@ -35,24 +35,39 @@ const MOCK_TRIPS = [
     }
 ];
 
+function displayEditTrip(tripId) {
+    $(`.trip-content[data=${tripId}]`).html(`
+    <form id="js-trip-edit-form" data="${tripId}">
+        <input type="text" placeholder="Trip Name" value="${MOCK_TRIPS[tripId - 1].name}"><br>
+        <input type="text" placeholder="Location(s)" value="${MOCK_TRIPS[tripId - 1].location}"><br>
+        <input type="datetime" value="Start Date"><input type="datetime" value="End Date"><br>
+        <input type="submit">
+    </form>
+    `);
+}
+
 function editTrip(tripId) {
     console.log(`Editing ${tripId}`);
+    //Edit Trip
+    displayTrips();
 }
 
 function deleteTrip(tripId) {
+    //Delete Trip
     console.log(`Deleting ${tripId}`);
 }
 
 function displayTrips() {
+    $('.content').html('');
     MOCK_TRIPS.forEach(trip => {
         $('.content').append(`
         <div class="grid-item">
-            <div class="trip-content">
+            <div class="trip-content" data="${trip.id}">
                 <span class="trip-name">${trip.name}</span><br>
                 <span class="trip-location">${trip.location}</span><br>
                 <span class="trip-dates">${trip.startDate} - ${trip.endDate}</span><br>
-                <button class="js-edit-trip" data="${trip.id}">Edit</button>
-                <button class="js-delete-trip" data="${trip.id}">Delete</button>
+                <button class="js-edit-trip">Edit</button>
+                <button class="js-delete-trip">Delete</button>
             </div>
         </div>
         `);
@@ -64,12 +79,16 @@ function eventListener() {
     displayTrips();
     $('.content').on('click', '.js-edit-trip', function(event) {
         event.preventDefault();
-        editTrip($(this).attr('data'));
+        displayEditTrip($(this).parent().attr('data'));
     });
     $('.content').on('click', '.js-delete-trip', function(event) {
         event.preventDefault();
-        deleteTrip($(this).attr('data'));
+        deleteTrip($(this).parent().attr('data'));
     });
+    $('.content').on('submit', '#js-trip-edit-form', function(event) {
+        event.preventDefault();
+        editTrip($(this).parent().attr('data'));
+    })
 }
 
 $(eventListener);
