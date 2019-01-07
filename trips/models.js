@@ -26,13 +26,15 @@ const TripSchema = mongoose.Schema({
     //events: [eventSchema]
 });
 
+
+
 TripSchema.methods.serialize = function () {
     return {
         id: this._id,
         name: this.name,
         location: this.location,
-        startDate: this.startDate,
-        endDate: this.endDate,
+        startDate: this.startDate.toDateString(),
+        endDate: this.endDate.toDateString(),
         background: this.background
     };
 }

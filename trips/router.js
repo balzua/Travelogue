@@ -8,9 +8,7 @@ const router = express.Router();
 router.get('/', (req, res) => {
     Trip.find()
     .then(trips => {
-        res.status(200).json({
-            trips: trips.map(trip => trip.serialize())
-        })
+        res.status(200).send(trips.map(trip => trip.serialize()));
     })
     .catch(err => {
         console.error(err);
@@ -38,8 +36,8 @@ router.post('/', jsonParser, (req, res) => {
         }
     });
     Trip.create(req.body)
-    .then(() => {
-        res.status(201).json(req.body);
+    .then((newTrip) => {
+        res.status(201).json(newTrip.serialize());
     })
     .catch(err => {
         console.error(err);
@@ -68,9 +66,12 @@ router.put('/:id', jsonParser, (req, res) => {
 });
 
 router.delete('/:id', (req, res) => {
-    Trip.deleteOne({_id: req.params.id})
+    Trip.findByIdAndDelete(req.params.id)
     .then(res.status(204).end())
-    .catch(res.status(500).json({message: 'Internal Server Error'}));
+    .catch(err => {
+        console.error(err);
+        res.status(500).json({message: 'Internal Server Error'});
+    });
 });
 
 router.get('*', (req, res) => {
