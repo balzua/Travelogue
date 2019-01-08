@@ -42,8 +42,7 @@ function displayTripDetails(tripId) {
 function displayEditTrip(tripId) {
     $(`.trip-content[data=${tripId}]`).html(`
     <form id="js-trip-edit-form" data="${tripId}">
-        <input type="text" placeholder="Trip Name" value="${MOCK_TRIPS[tripId - 1].name}"><br>
-        <input type="text" placeholder="Location(s)" value="${MOCK_TRIPS[tripId - 1].location}"><br>
+
         <input type="datetime" value="Start Date"><input type="datetime" value="End Date"><br>
         <input type="submit">
     </form>
@@ -63,37 +62,50 @@ function displayAddForm() {
 }
 
 function addTrip() {
-    console.log(`Adding Trip`);
-    //Add Trip
+    //Get values from form, format into post request, submit, then check status code.
 
 }
 
 function editTrip(tripId) {
-    console.log(`Editing ${tripId}`);
-    //Edit Trip
+    //Get values from form, format into put request, submit, then check status code.
     displayTrips();
 }
 
 function deleteTrip(tripId) {
-    //Delete Trip
-    console.log(`Deleting ${tripId}`);
+    //TODO: Add user confirmation behavior...
+    fetch(`/trips/${tripId}`, {method: 'delete'})
+    .then(res => {
+        if (res.ok) {
+            //Delete successful - display feedback
+            displayTrips();
+        }
+        else {
+            //TODO: Better error handling
+            throw new Error(res.statusText);
+        }
+    })
+    .catch('An error occurred');
 }
 
 function displayTrips() {
     $('.content').html('');
-    MOCK_TRIPS.forEach(trip => {
-        $('.content').append(`
-        <div class="grid-item">
-            <div class="trip-content" data="${trip.id}">
-                <span class="trip-name">${trip.name}</span><br>
-                <span class="trip-location">${trip.location}</span><br>
-                <span class="trip-dates">${trip.startDate} - ${trip.endDate}</span><br>
-                <button class="js-edit-trip">Edit</button>
-                <button class="js-delete-trip">Delete</button>
+    fetch('/trips')
+    .then(res => res.json())
+    .then(trips => {
+        trips.forEach(trip => {
+            $('.content').append(`
+            <div class="grid-item">
+                <div class="trip-content" data="${trip.id}">
+                    <span class="trip-name">${trip.name}</span><br>
+                    <span class="trip-location">${trip.location}</span><br>
+                    <span class="trip-dates">${trip.startDate} - ${trip.endDate}</span><br>
+                    <button class="js-edit-trip">Edit</button>
+                    <button class="js-delete-trip">Delete</button>
+                </div>
             </div>
-        </div>
-        `);
-        $('.content').children().last().css("background-image", "url('" + trip.background + "')");
+            `);
+            $('.content').children().last().css("background-image", "url('" + trip.background + "')");
+        });
     });
 }
 
@@ -115,7 +127,7 @@ function eventListener() {
         event.preventDefault();
         editTrip($(this).parent().attr('data'));
     });
-    $('.content').on('submit', '#js-trip-add-form', function(event) {
+    $('.options').on('submit', '#js-trip-add-form', function(event) {
         event.preventDefault();
         addTrip();
     });
