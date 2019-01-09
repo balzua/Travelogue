@@ -30,11 +30,15 @@ router.get('/:id', (req, res) => {
 router.post('/', jsonParser, (req, res) => {
     //Validate request
     const requiredFields = ['name', 'location', 'startDate', 'endDate'];
+    let missingFields = [];
     requiredFields.forEach(field => {
         if (!(field in req.body)) {
-            res.status(400).send({message: `Missing field: ${field}`});
+            missingFields.push(field);
         }
-    });
+    }); 
+    if (missingFields.length > 0) {
+        return res.status(400).send(`Missing fields: ${missingFields.join(' ')}`);
+    }
     Trip.create(req.body)
     .then((newTrip) => {
         res.status(201).json(newTrip.serialize());
@@ -48,6 +52,7 @@ router.post('/', jsonParser, (req, res) => {
 router.put('/:id', jsonParser, (req, res) => {
     if (req.params.id !== req.body.id) {
         const message = `Request path id ${req.params.id} and body id ${req.body.id} must match`;
+        console.error(message);
         return res.status(400).json({message: message});
     }
     const updated = {};

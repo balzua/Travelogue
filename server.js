@@ -18,6 +18,8 @@ app.use(express.static('public'));
 let server;
 
 //Routers
+app.use('/users', usersRouter);
+app.use('/auth', authRouter);
 app.use('/trips', tripRouter);
 
 function runServer(databaseUrl, port=PORT) {

@@ -148,7 +148,6 @@ describe('Trip Endpoints', function () {
         .send(newTrip)
         .then(function (res) {
             expect(res).to.have.status(400);
-            expect(res.body.message).to.equal('Missing field: name');
         });
     });
 
