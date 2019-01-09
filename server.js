@@ -1,9 +1,10 @@
 const express = require('express');
 const morgan = require('morgan');
 const mongoose = require('mongoose');
+const passport = require('passport');
 const {router: tripRouter} = require('./trips');
 const {router: usersRouter} = require('./users');
-const {router: authRouter} = require('./auth');
+const {router: authRouter, jwtStrategy} = require('./auth');
 
 //Mongoose promise fix
 mongoose.Promise = global.Promise;
@@ -15,12 +16,15 @@ const {PORT, DATABASE_URL} = require('./config');
 const app = express();
 app.use(morgan('common'));
 app.use(express.static('public'));
+passport.use(jwtStrategy);
+const jwtAuth = passport.authenticate('jwt', { session: false });
+
 let server;
 
 //Routers
 app.use('/users', usersRouter);
 app.use('/auth', authRouter);
-app.use('/trips', tripRouter);
+app.use('/trips', jwtAuth, tripRouter);
 
 function runServer(databaseUrl, port=PORT) {
   return new Promise((resolve, reject) => {

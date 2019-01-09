@@ -1,9 +1,14 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const passport = require('passport');
 const {Trip} = require('./models');
+const {jwtStrategy} = require('../auth');
 
 const jsonParser = bodyParser.json();
 const router = express.Router();
+
+
+
 
 router.get('/', (req, res) => {
     Trip.find()
