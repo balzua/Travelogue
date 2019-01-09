@@ -1,4 +1,16 @@
 'use strict';
+let token = localStorage.getItem('authToken');
+
+//Creates an object from a form where the keys are the form input names and the values are the respective values
+//Pass the form ID as an argument
+function formToObject(form) {
+    let formData = {};
+    const rawForm = $(`${form}`).serializeArray();
+    rawForm.forEach(input => {  
+        formData[input.name] = input.value;  
+    });
+    return formData;
+}
 
 function displayTripDetails(tripId) {
     $('.content').html('');
@@ -27,13 +39,59 @@ function displayAddForm() {
     `);
 }
 
+function displayLogin() {
+    $('.modal-content').html(`<form id="js-login">
+        <label for="username">Username:</label><br>
+        <input type="text" placeholder="Username" name="username" id="username"><br>
+        <label for="password">Password:</label><br>
+        <input type="password" placeholder="Password" name="password" id="password"><br>
+        <input type="submit">
+    </form>
+    `);
+    $('.modal').removeClass('hidden');
+}
+
+function displaySignUpForm() {
+    $('.modal-content').html(`<form id="js-signup">
+        <label for="username">Username:</label><br>
+        <input type="text" placeholder="Username" name="username" id="username"><br>
+        <label for="password">Password:</label><br>
+        <input type="password" placeholder="Password" name="password" id="password"><br>
+        <input type="submit">
+    </form>
+    `);
+    $('.modal').removeClass('hidden');
+}
+
+function login() {
+    const loginData = formToObject('#js-login');
+    fetch('/auth/login', {
+        method: 'post',
+        body: JSON.stringify(loginData),
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
+    .then(res => res.json())
+    .then(responseJson => {
+        localStorage.setItem('authToken', responseJson.authToken);
+        //TODO: Add error feedback
+        $('.modal').addClass('hidden');
+        displayTrips();
+    })
+    .catch(err => {
+        //TODO: error handling
+        console.log(err);
+    });
+}
+
+function signUp() {
+
+}
+
 function addTrip() {
     //Get values from form, format into post request, submit, then check status code.
-    let tripData = {};
-    const rawTripData = $('#js-trip-add-form').serializeArray();
-    rawTripData.forEach(trip => {  
-        tripData[trip.name] = trip.value;  
-    });
+    let tripData = formToObject('#js-trip-add-form')
     fetch('/trips', {
         method: 'post', 
         body: JSON.stringify(tripData),
@@ -55,12 +113,7 @@ function addTrip() {
 }
 
 function editTrip(tripId) {
-    let tripData = {};
-    const rawTripData = $('#js-trip-edit-form').serializeArray();
-    rawTripData.forEach(trip => {  
-        tripData[trip.name] = trip.value;  
-    });
-    tripData.id = tripId;
+    let tripData = formToObject('#js-trip-edit-form')
     console.log(JSON.stringify(tripData));
     fetch(`/trips/${tripId}`, {
         method: 'put', 
@@ -99,8 +152,13 @@ function deleteTrip(tripId) {
 }
 
 function displayTrips() {
+    console.log(token);
     $('.content').html('');
-    fetch('/trips')
+    fetch('/trips', {
+        headers: {
+            "Authorization": `Bearer ${token}`
+        }
+    })
     .then(res => res.json())
     .then(trips => {
         trips.forEach(trip => {
@@ -133,7 +191,15 @@ function eventListener() {
     $('.options').on('click', '.add-trip', function(event) {
         event.preventDefault();
         displayAddForm();
-    })
+    });
+    $('.options').on('click', '.login', function(event) {
+        event.preventDefault();
+        displayLogin();
+    });
+    $('.options').on('click', '.sign-up', function(event) {
+        event.preventDefault();
+        displaySignUpForm();
+    });
     $('.content').on('submit', '#js-trip-edit-form', function(event) {
         event.preventDefault();
         editTrip($(this).parent().attr('data'));
@@ -141,6 +207,20 @@ function eventListener() {
     $('.options').on('submit', '#js-trip-add-form', function(event) {
         event.preventDefault();
         addTrip();
+    });
+    $('.modal').on('click', function(event) {
+        //Only close the modal if the closest target is NOT "modal-content" (i.e. clicked inside the content box)
+        if (!$(event.target).closest('.modal-content').length) {
+            $('.modal').addClass('hidden');
+        }
+    });
+    $('.modal-content').on('submit', '#js-login', function(event) {
+        event.preventDefault();
+        login();
+    });
+    $('.modal-content').on('submit', '#js-signup', function(event) {
+        event.preventDefault();
+        signup();
     });
 }
 
