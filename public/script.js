@@ -12,6 +12,15 @@ function formToObject(form) {
     return formData;
 }
 
+function removeModal() {
+    $('.modal').addClass('hidden');
+}
+
+function displayModal() {
+    $('.modal').removeClass('hidden');
+}
+
+//TODO: Implement This
 function displayTripDetails(tripId) {
     $('.content').html('');
 }
@@ -41,14 +50,12 @@ function displayAddForm() {
 
 function displayLogin() {
     $('.modal-content').html(`<form id="js-login">
-        <label for="username">Username:</label><br>
-        <input type="text" placeholder="Username" name="username" id="username"><br>
-        <label for="password">Password:</label><br>
-        <input type="password" placeholder="Password" name="password" id="password"><br>
+        <label for="username">Username: <input type="text" placeholder="Username" name="username" id="username"></label><br>
+        <label for="password">Password: <input type="password" placeholder="Password" name="password" id="password"></label><br>
         <input type="submit">
     </form>
     `);
-    $('.modal').removeClass('hidden');
+    displayModal();
 }
 
 function displaySignUpForm() {
@@ -60,7 +67,7 @@ function displaySignUpForm() {
         <input type="submit">
     </form>
     `);
-    $('.modal').removeClass('hidden');
+    displayModal();
 }
 
 function login() {
@@ -76,7 +83,7 @@ function login() {
     .then(responseJson => {
         localStorage.setItem('authToken', responseJson.authToken);
         //TODO: Add error feedback
-        $('.modal').addClass('hidden');
+        removeModal();
         displayTrips();
     })
     .catch(err => {
@@ -97,7 +104,7 @@ function signUp() {
     .then(response => {
         if (response.ok) {
             //TODO: feedback
-            $('.modal').addClass('hidden');
+            removeModal();
         }
         else {
             //TODO: error handling
@@ -234,7 +241,7 @@ function eventListener() {
     $('.modal').on('click', function(event) {
         //Only close the modal if the closest target is NOT "modal-content" (i.e. clicked inside the content box)
         if (!$(event.target).closest('.modal-content').length) {
-            $('.modal').addClass('hidden');
+            removeModal();
         }
     });
     $('.modal-content').on('submit', '#js-login', function(event) {
