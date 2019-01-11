@@ -80,7 +80,7 @@ function displayAddForm() {
         </div>
         <div class="form-line">
             <label for="location">Location</label>
-            <input type="text" placeholder="e.g. Tokyo" name="location" id="location">
+            <input type="text" placeholder="e.g. Florida" name="location" id="location">
         </div>
         <div class="form-line">
             <label for="startDate">Start Date</label>
