@@ -3,11 +3,13 @@ const mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
 
 const EventSchema = mongoose.Schema({
-
-    //events: [eventSchema]
+    trip: tripSchema,
+    time: {},
+    name: {},
+    location: {},
+    description: {},
+    image: {}
 });
-
-
 
 EventSchema.methods.serialize = function () {
     return {

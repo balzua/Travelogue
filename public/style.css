@@ -11,8 +11,12 @@ body * {
 
 h1 {
     font-family: 'Permanent Marker', cursive;
-    font-size: 52px;
+    font-size: 40px;
     margin: 0;
+}
+
+.userinfo a {
+    color: white;
 }
 
 .grid-item {

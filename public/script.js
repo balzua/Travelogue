@@ -32,6 +32,23 @@ function displayTripDetails(tripId) {
     $('.content').html('');
 }
 
+function logout() {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
+    location.reload();
+}
+
+function displayUserInfo() {
+    $('.userinfo').html('');
+    const user = localStorage.getItem('user');
+    if(user) {
+        $('.userinfo').append(`Welcome, ${user} | <a href="javascript:logout()">Logout</a>`);
+    }
+    else {
+        $('.userinfo').append(`Welcome: <a href="javascript:displayLogin()">Login</a> | <a href="javascript:displaySignUpForm()">Signup</a>`);
+    }
+}
+
 function displayEditTrip(tripId) {
     $(`.trip-content[data=${tripId}]`).html(`
     <form id="js-trip-edit-form" data="${tripId}">
@@ -91,9 +108,9 @@ function login() {
     .then(res => res.json())
     .then(responseJson => {
         localStorage.setItem('authToken', responseJson.authToken);
+        localStorage.setItem('user', responseJson.user);
         //TODO: Add error feedback
-        removeModal();
-        displayTrips();
+        location.reload();
     })
     .catch(err => {
         //TODO: error handling
@@ -219,6 +236,7 @@ function displayTrips() {
 }
 
 function eventListener() {
+    displayUserInfo();
     displayTrips();
     $('.content').on('click', '.js-edit-trip', function(event) {
         event.preventDefault();

@@ -21,14 +21,9 @@
     }
 }
 
-.header {
-    background-color: rgba(255, 255, 255, 0.95);
-    margin: 5px;
-    border: 1px solid black;
-    text-align: center;
-    padding: 20px;
-    font-size: 40px;
-    font-weight: bold;
+
+.userinfo {
+    padding: 5px;
 }
 
 .options {
@@ -59,6 +54,10 @@
     color: white;
     font-weight: bold;
     text-align: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 3px 50px;
 }
 
 #footer {
