@@ -14,6 +14,15 @@ function formToObject(form) {
     return formData;
 }
 
+function randomPageImage() {
+    const path = '/assets/panes';
+    const images = ['china', 'japan', 'new-york', 'palm-trees', 
+    'paris', 'rio', 'savannah', 'sydney', 'travel', 'venice'];
+    const random = Math.floor(Math.random() * (images.length));
+    console.log(random);
+    return `${path}/${images[random]}.jpg`;
+}
+
 function displayEvents(tripId) {
     console.log("Switching to Event View");
     $('.content').html('');
@@ -75,9 +84,18 @@ function displayAddForm() {
 
 function displayLogin() {
     $('.modal-content').html(`
+    <div class="pane"><img src="${randomPageImage()}"></div>
+    <h2>Login</h2>
     <form id="js-login" action="javascript:login()">
-        <label for="username">Username: <input type="text" placeholder="Username" name="username" id="username"></label><br>
-        <label for="password">Password: <input type="password" placeholder="Password" name="password" id="password"></label><br>
+        <div class="form-line">
+            <label for="username">Username</label>
+            <input type="text" placeholder="Username" name="username" id="username" required>
+        </div>
+        <div class="form-line">
+            <label for="password">Password</label>
+            <input type="password" placeholder="Password" name="password" id="password" required>
+        </div>
+        <br>
         <input type="submit">
     </form>
     `);
@@ -85,11 +103,19 @@ function displayLogin() {
 }
 
 function displaySignUpForm() {
-    $('.modal-content').html(`<form id="js-signup">
-        <label for="username">Username:</label><br>
-        <input type="text" placeholder="Username" name="username" id="username"><br>
-        <label for="password">Password:</label><br>
-        <input type="password" placeholder="Password" name="password" id="password"><br>
+    $('.modal-content').html(`
+    <div class="pane"><img src="${randomPageImage()}"></div>
+    <h2>Register</h2>
+    <form id="js-signup" action="javascript:signup()">
+        <div class="form-line">
+            <label for="username">Username</label>
+            <input type="text" placeholder="Username" name="username" id="username" required>
+        </div>
+        <div class="form-line">
+            <label for="password">Password</label>
+            <input type="password" placeholder="Password" name="password" id="password" required>
+        </div>
+        <br>
         <input type="submit">
     </form>
     `);

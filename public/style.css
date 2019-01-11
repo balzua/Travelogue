@@ -15,8 +15,41 @@ h1 {
     margin: 0;
 }
 
+h2 {
+    font-family: 'Permanent Marker', cursive;
+    font-size: 38px;
+    margin: 0 0 0.25em 0;
+}
+
 .userinfo a {
     color: white;
+}
+
+.form-line {
+    margin-bottom: 0.5em;
+}
+
+.form-line label {
+    margin: 0 1em 0 0;
+}
+
+input, button {
+    box-shadow: inset 0 1px 3px #ddd;
+    border-radius: 4px;
+    padding: .5em .6em;
+    border: 1px solid #ccc;
+    margin: 0 0.1em 0;
+}
+
+.pane {
+    padding: 0;
+    height: 40%;
+}
+
+.pane img {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
 }
 
 .grid-item {
@@ -78,15 +111,19 @@ h1 {
 .modal-content {
     background-color: #fefefe;
     margin: auto;
-    padding: 20px;
     border: 1px solid #888;
-    width: 80%;
-    height: 60%;
+    box-shadow: 5px 5px 100px;
 }
 
 @media only screen and (min-width: 600px) {
     .modal-content {
         width: 400px;
+        border-radius: 10px;
     }
+
+    .pane img {
+        border-radius: 10px 10px 0 0;
+    }
+
 }
 
