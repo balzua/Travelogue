@@ -22,6 +22,10 @@ const TripSchema = mongoose.Schema({
     background: {
         type: String,
         default: ''
+    },
+    user: {
+        type: String,
+        default: ''
     }
     //events: [eventSchema]
 });

@@ -69,7 +69,7 @@ function login() {
         method: 'post',
         body: JSON.stringify(loginData),
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
     })
     .then(res => res.json())
@@ -86,7 +86,28 @@ function login() {
 }
 
 function signUp() {
-
+    const loginData = formToObject('#js-signup');
+    fetch('/users', {
+        method: 'post',
+        body: JSON.stringify(loginData),
+        headers: {
+            "Content-Type": "application/json",
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            //TODO: feedback
+            $('.modal').addClass('hidden');
+        }
+        else {
+            //TODO: error handling
+            throw new Error();
+        }
+    })
+    .catch(err => {
+        //TODO: error handling
+        console.log(err);
+    });
 }
 
 function addTrip() {
@@ -96,7 +117,8 @@ function addTrip() {
         method: 'post', 
         body: JSON.stringify(tripData),
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
         }
     })
     .then(res => {
@@ -119,7 +141,8 @@ function editTrip(tripId) {
         method: 'put', 
         body: JSON.stringify(tripData),
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
         }
     })
     .then(res => {
@@ -137,7 +160,7 @@ function editTrip(tripId) {
 
 function deleteTrip(tripId) {
     //TODO: Add user confirmation behavior...
-    fetch(`/trips/${tripId}`, {method: 'delete'})
+    fetch(`/trips/${tripId}`, {method: 'delete', headers: {"Authorization": `Bearer ${token}`}})
     .then(res => {
         if (res.ok) {
             //Delete successful - display feedback
@@ -220,7 +243,7 @@ function eventListener() {
     });
     $('.modal-content').on('submit', '#js-signup', function(event) {
         event.preventDefault();
-        signup();
+        signUp();
     });
 }
 
