@@ -7,9 +7,16 @@ function formToObject(form) {
     let formData = {};
     const rawForm = $(`${form}`).serializeArray();
     rawForm.forEach(input => {  
-        formData[input.name] = input.value;  
+        if (input.value != '') {
+            formData[input.name] = input.value;  
+        }
     });
     return formData;
+}
+
+function displayEvents(tripId) {
+    console.log("Switching to Event View");
+    $('.content').html('');
 }
 
 function removeModal() {
@@ -37,8 +44,8 @@ function displayEditTrip(tripId) {
 }
 
 function displayAddForm() {
-    $('.options').append(`
-    <form id="js-trip-add-form">
+    $('.modal-content').html(`
+    <form id="js-trip-add-form" action="javascript:addTrip()">
         <input type="text" placeholder="Trip Name" name="name"><br>
         <input type="text" placeholder="Location(s)" name="location"><br>
         <input type="datetime" value="Start Date" name="startDate"><input type="datetime" value="End Date" name="endDate"><br>
@@ -46,10 +53,12 @@ function displayAddForm() {
         <input type="submit">
     </form>
     `);
+    displayModal();
 }
 
 function displayLogin() {
-    $('.modal-content').html(`<form id="js-login">
+    $('.modal-content').html(`
+    <form id="js-login" action="javascript:login()">
         <label for="username">Username: <input type="text" placeholder="Username" name="username" id="username"></label><br>
         <label for="password">Password: <input type="password" placeholder="Password" name="password" id="password"></label><br>
         <input type="submit">
@@ -131,6 +140,7 @@ function addTrip() {
     .then(res => {
         if (res.ok) {
             //TODO: Post successful - display feedback
+            removalModal();
             displayTrips();
         } 
         else {
@@ -195,7 +205,7 @@ function displayTrips() {
             $('.content').append(`
             <div class="grid-item">
                 <div class="trip-content" data="${trip.id}">
-                    <span class="trip-name">${trip.name}</span><br>
+                    <span class="trip-name"><a href="javascript:displayEvents('${trip.id}')">${trip.name}</a></span><br>
                     <span class="trip-location">${trip.location}</span><br>
                     <span class="trip-dates">${trip.startDate} - ${trip.endDate}</span><br>
                     <button class="js-edit-trip">Edit</button>
@@ -222,31 +232,15 @@ function eventListener() {
         event.preventDefault();
         displayAddForm();
     });
-    $('.options').on('click', '.login', function(event) {
-        event.preventDefault();
-        displayLogin();
-    });
-    $('.options').on('click', '.sign-up', function(event) {
-        event.preventDefault();
-        displaySignUpForm();
-    });
     $('.content').on('submit', '#js-trip-edit-form', function(event) {
         event.preventDefault();
         editTrip($(this).parent().attr('data'));
-    });
-    $('.options').on('submit', '#js-trip-add-form', function(event) {
-        event.preventDefault();
-        addTrip();
     });
     $('.modal').on('click', function(event) {
         //Only close the modal if the closest target is NOT "modal-content" (i.e. clicked inside the content box)
         if (!$(event.target).closest('.modal-content').length) {
             removeModal();
         }
-    });
-    $('.modal-content').on('submit', '#js-login', function(event) {
-        event.preventDefault();
-        login();
     });
     $('.modal-content').on('submit', '#js-signup', function(event) {
         event.preventDefault();
