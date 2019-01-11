@@ -71,11 +71,30 @@ function displayEditTrip(tripId) {
 
 function displayAddForm() {
     $('.modal-content').html(`
+    <div class="pane"><img src="/assets/panes/new-trip.jpg"></div>
+    <h2>Add Trip</h2>
     <form id="js-trip-add-form" action="javascript:addTrip()">
-        <input type="text" placeholder="Trip Name" name="name"><br>
-        <input type="text" placeholder="Location(s)" name="location"><br>
-        <input type="datetime" value="Start Date" name="startDate"><input type="datetime" value="End Date" name="endDate"><br>
-        <input type="text" value="Image URL" name="background"><br>
+        <div class="form-line">
+            <label for="name">Trip Name</label>
+            <input type="text" placeholder="e.g. My Summer Vacation" name="name" id="name">
+        </div>
+        <div class="form-line">
+            <label for="location">Location</label>
+            <input type="text" placeholder="e.g. Tokyo" name="location" id="location">
+        </div>
+        <div class="form-line">
+            <label for="startDate">Start Date</label>
+            <input type="datetime" placeholder="e.g. 1/5/2018" name="startDate" id="startDate">
+        </div>
+        <div class="form-line">
+            <label for="endDate">End Date</label> 
+            <input type="datetime" placeholder="e.g. 1/12/2018" name="endDate" id="endDate">
+        </div>
+        <div class="form-line">
+            <label for="background">Image URL</label>
+            <input type="text" placeholder="optional" name="background" id="background">
+        </div>
+        <br>
         <input type="submit">
     </form>
     `);
