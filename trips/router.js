@@ -6,10 +6,8 @@ const jsonParser = bodyParser.json();
 const router = express.Router();
 
 
-
-
 router.get('/', (req, res) => {
-    Trip.find()
+    Trip.find({user: req.user.username || ""})
     .then(trips => {
         res.status(200).send(trips.map(trip => trip.serialize()));
     })
@@ -42,7 +40,10 @@ router.post('/', jsonParser, (req, res) => {
     if (missingFields.length > 0) {
         return res.status(400).send(`Missing fields: ${missingFields.join(' ')}`);
     }
-    Trip.create(req.body)
+    const newTrip = req.body;
+    console.log(req.user);
+    newTrip.user = req.user.username;
+    Trip.create(newTrip)
     .then((newTrip) => {
         res.status(201).json(newTrip.serialize());
     })

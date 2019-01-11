@@ -21,7 +21,7 @@ const TripSchema = mongoose.Schema({
     },
     background: {
         type: String,
-        default: ''
+        default: '/assets/defaultimg.png'
     },
     user: {
         type: String,
