@@ -190,7 +190,19 @@ function signUp() {
     .then(parseJSON)
     .then(res => {
         if (res.ok) {
-            location.reload();
+            fetch('/auth/login', {
+                method: 'post',
+                body: JSON.stringify(loginData),
+                headers: {
+                    "Content-Type": "application/json",
+                }
+            })
+            .then(res => res.json())
+            .then(responseJson => {
+                localStorage.setItem('authToken', responseJson.authToken);
+                localStorage.setItem('user', responseJson.user);
+                location.reload();
+            })
         }
         else {
             throw new Error(res.json.message);

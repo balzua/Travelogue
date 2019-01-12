@@ -70,10 +70,6 @@ input, button {
     color: white;
 }
 
-.grid-item:hover {
-    text-decoration: underline;
-}
-
 .trip-content {
     background: linear-gradient(
         to bottom,
