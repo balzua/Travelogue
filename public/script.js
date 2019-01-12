@@ -114,7 +114,8 @@ function displayLogin() {
     <div class="pane"><img src="${randomPageImage()}"></div>
     <h2>Login</h2>
     <form id="js-login" action="javascript:login()">
-        <span class="modal-error"></span>
+        <div class="modal-error">
+        </div>
         <div class="form-line">
             <label for="username">Username</label>
             <input type="text" placeholder="Username" name="username" id="username" required>
@@ -165,9 +166,7 @@ function login() {
         if (res.ok) {
             return res.json();
         }
-        else {
-            throw new Error(res.body.message);
-        }
+        throw new Error('Invalid username/password combination.');
     })
     .then(responseJson => {
         localStorage.setItem('authToken', responseJson.authToken);
