@@ -3,10 +3,12 @@ const chai = require('chai');
 const chaiHttp = require('chai-http');
 const faker = require('faker');
 const mongoose = require('mongoose');
+const jwt = require('jsonwebtoken');
 
 const { Trip } = require('../trips');
+const { User } = require('../users');
 const { app, runServer, closeServer } = require('../server');
-const { TEST_DATABASE_URL } = require('../config');
+const { TEST_DATABASE_URL, JWT_SECRET } = require('../config');
 
 const expect = chai.expect;
 chai.use(chaiHttp);
@@ -25,7 +27,9 @@ function generateTrip() {
         name: faker.lorem.words(),
         location: faker.address.country(),
         startDate: faker.date.past(2),
-        endDate: faker.date.past(1)
+        endDate: faker.date.past(1),
+        background: 'fakeUrl',
+        user: 'testUser'
     }
 }
 
@@ -36,12 +40,30 @@ function tearDownDb() {
 
 describe('Trip Endpoints', function () {
 
+    const user = {username: 'testUser'};
+    const password = 'testPass';
+    let token = jwt.sign({user}, JWT_SECRET, {
+        subject: user.username,
+        expiresIn: '7d',
+        algorithm: 'HS256'
+    });
+
     before(function () {
         return runServer(TEST_DATABASE_URL);
     });
 
     beforeEach(function () {
         return seedTrips();
+    });
+
+    beforeEach(function () {
+        return User.hashPassword(password).then(password => {
+            User.create({username: user.username, password});
+        })
+    });
+    
+    afterEach(function () {
+        return tearDownDb();
     });
 
     after(function () {
@@ -52,10 +74,12 @@ describe('Trip Endpoints', function () {
         return tearDownDb();
     });
 
+
     it('should get all trips successfully', function () {
         let res;
         return chai.request(app)
         .get('/trips')
+        .set('authorization', `Bearer ${token}`)
         .then(function (_res) {
             //Set res equal to the response for use later.
             res = _res;
@@ -75,6 +99,7 @@ describe('Trip Endpoints', function () {
         const expectedKeys = ['id', 'name', 'location', 'startDate', 'endDate'];
         return chai.request(app)
         .get('/trips')
+        .set('authorization', `Bearer ${token}`)
         .then(function (res) {
             expect(res).to.have.status(200);
             expect(res).to.be.json;
@@ -102,7 +127,7 @@ describe('Trip Endpoints', function () {
         return Trip.findOne()
         .then(function (_toGetTrip) {
             toGetTrip = _toGetTrip;
-            return chai.request(app).get(`/trips/${toGetTrip.id}`);
+            return chai.request(app).get(`/trips/${toGetTrip.id}`).set('authorization', `Bearer ${token}`);
         })
         .then(function (res) {
             expect(res).to.have.status(200);
@@ -118,6 +143,7 @@ describe('Trip Endpoints', function () {
         const newTrip = generateTrip();
         return chai.request(app)
         .post('/trips')
+        .set('authorization', `Bearer ${token}`)
         .send(newTrip)
         .then(function (res) {
             expect(res).to.have.status(201);
@@ -128,6 +154,7 @@ describe('Trip Endpoints', function () {
             expect(res.body.location).to.equal(newTrip.location);
             expect(res.body.startDate).to.equal(newTrip.startDate.toDateString());
             expect(res.body.endDate).to.equal(newTrip.endDate.toDateString());
+            expect(res.body.user).to.equal('testUser');
             expect(res.body.id).to.not.be.null;
             return Trip.findById(res.body.id);
         })
@@ -145,6 +172,7 @@ describe('Trip Endpoints', function () {
         delete newTrip.name;
         return chai.request(app)
         .post('/trips')
+        .set('authorization', `Bearer ${token}`)
         .send(newTrip)
         .then(function (res) {
             expect(res).to.have.status(400);
@@ -158,7 +186,9 @@ describe('Trip Endpoints', function () {
         };
         return Trip.findOne()
         .then(function (toUpdateTrip) {
-            return chai.request(app).put(`/trips/${toUpdateTrip._id}`).send(updateData);
+            return chai.request(app).put(`/trips/${toUpdateTrip._id}`)
+            .set('authorization', `Bearer ${token}`)
+            .send(updateData);
         })
         .then(function(res) {
             expect(res).to.have.status(400);
@@ -176,7 +206,9 @@ describe('Trip Endpoints', function () {
         return Trip.findOne()
         .then(function (toUpdateTrip) {
             updateData.id = toUpdateTrip._id;
-            return chai.request(app).put(`/trips/${updateData.id}`).send(updateData);
+            return chai.request(app).put(`/trips/${updateData.id}`)
+            .set('authorization', `Bearer ${token}`)
+            .send(updateData);
         })
         .then(function(res) {
             expect(res).to.have.status(204);
@@ -200,7 +232,9 @@ describe('Trip Endpoints', function () {
         return Trip.findOne()
         .then(function (toUpdatePost) {
             updateData.id = toUpdatePost._id;
-            return chai.request(app).put(`/trips/${updateData.id}`).send(updateData);
+            return chai.request(app).put(`/trips/${updateData.id}`)
+            .set('authorization', `Bearer ${token}`)
+            .send(updateData);
         })
         .then(function(res) {
             expect(res).to.have.status(204);
@@ -218,7 +252,9 @@ describe('Trip Endpoints', function () {
         return Trip.findOne()
         .then(function(_deleteTrip) {
             deleteTrip = _deleteTrip;
-            return chai.request(app).delete(`/trips/${deleteTrip._id}`);
+            return chai.request(app)
+            .delete(`/trips/${deleteTrip._id}`)
+            .set('authorization', `Bearer ${token}`);
         })
         .then(function(res) {
             expect(res).to.have.status(204);

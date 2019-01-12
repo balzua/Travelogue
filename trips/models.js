@@ -25,7 +25,7 @@ const TripSchema = mongoose.Schema({
     },
     user: {
         type: String,
-        default: ''
+        required: true
     }
     //events: [eventSchema]
 });
@@ -39,7 +39,8 @@ TripSchema.methods.serialize = function () {
         location: this.location,
         startDate: this.startDate.toDateString(),
         endDate: this.endDate.toDateString(),
-        background: this.background
+        background: this.background,
+        user: this.user
     };
 }
 
