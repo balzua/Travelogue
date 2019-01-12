@@ -119,6 +119,12 @@ input, button {
     box-shadow: 5px 5px 100px;
 }
 
+.modal-error {
+    margin-bottom: 0.4em;
+    font-weight: bold;
+    color: darkred;
+}
+
 @media only screen and (min-width: 600px) {
     .modal-content {
         width: 400px;

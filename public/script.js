@@ -1,6 +1,15 @@
 'use strict';
 let token = localStorage.getItem('authToken');
 
+function parseJSON(response) {
+    return new Promise((resolve) => response.json()
+      .then((json) => resolve({
+        status: response.status,
+        ok: response.ok,
+        json,
+      })));
+  }
+
 //Creates an object from a form where the keys are the form input names and the values are the respective values
 //Pass the form ID as an argument
 function formToObject(form) {
@@ -19,7 +28,6 @@ function randomPageImage() {
     const images = ['china', 'japan', 'new-york', 'palm-trees', 
     'paris', 'rio', 'savannah', 'sydney', 'travel', 'venice'];
     const random = Math.floor(Math.random() * (images.length));
-    console.log(random);
     return `${path}/${images[random]}.jpg`;
 }
 
@@ -106,6 +114,7 @@ function displayLogin() {
     <div class="pane"><img src="${randomPageImage()}"></div>
     <h2>Login</h2>
     <form id="js-login" action="javascript:login()">
+        <span class="modal-error"></span>
         <div class="form-line">
             <label for="username">Username</label>
             <input type="text" placeholder="Username" name="username" id="username" required>
@@ -126,6 +135,8 @@ function displaySignUpForm() {
     <div class="pane"><img src="${randomPageImage()}"></div>
     <h2>Register</h2>
     <form id="js-signup" action="javascript:signup()">
+        <div class="modal-error">
+        </div>
         <div class="form-line">
             <label for="username">Username</label>
             <input type="text" placeholder="Username" name="username" id="username" required>
@@ -150,16 +161,21 @@ function login() {
             "Content-Type": "application/json",
         }
     })
-    .then(res => res.json())
+    .then(res => {
+        if (res.ok) {
+            return res.json();
+        }
+        else {
+            throw new Error(res.body.message);
+        }
+    })
     .then(responseJson => {
         localStorage.setItem('authToken', responseJson.authToken);
         localStorage.setItem('user', responseJson.user);
-        //TODO: Add error feedback
         location.reload();
     })
     .catch(err => {
-        //TODO: error handling
-        console.log(err);
+        $('.modal-error').text(err.message);
     });
 }
 
@@ -172,19 +188,17 @@ function signUp() {
             "Content-Type": "application/json",
         }
     })
-    .then(response => {
-        if (response.ok) {
-            //TODO: feedback
-            removeModal();
+    .then(parseJSON)
+    .then(res => {
+        if (res.ok) {
+            location.reload();
         }
         else {
-            //TODO: error handling
-            throw new Error();
+            throw new Error(res.json.message);
         }
     })
     .catch(err => {
-        //TODO: error handling
-        console.log(err);
+        $('.modal-error').text(err.message);
     });
 }
 
