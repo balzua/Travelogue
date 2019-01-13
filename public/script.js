@@ -12,9 +12,9 @@ function parseJSON(response) {
 
 //Creates an object from a form where the keys are the form input names and the values are the respective values
 //Pass the form ID as an argument
-function formToObject(form) {
+function formToObject(form, tripId) {
     let formData = {};
-    const rawForm = $(`${form}`).serializeArray();
+    const rawForm = $(`${form}[data=${tripId}]`).serializeArray();
     rawForm.forEach(input => {  
         if (input.value != '') {
             formData[input.name] = input.value;  
@@ -158,7 +158,6 @@ function displaySignUpForm() {
  ****************************/
 
 function displayTrips() {
-    console.log(token);
     $('.content').html('');
     fetch('/trips', {
         headers: {
@@ -171,11 +170,15 @@ function displayTrips() {
             $('.content').append(`
             <div class="grid-item">
                 <div class="trip-content" data="${trip.id}">
-                    <span class="trip-name"><a href="javascript:displayEvents('${trip.id}')">${trip.name}</a></span><br>
-                    <span class="trip-location">${trip.location}</span><br>
-                    <span class="trip-dates">${trip.startDate} - ${trip.endDate}</span><br>
-                    <button class="js-edit-trip">Edit</button>
-                    <button class="js-delete-trip">Delete</button>
+                    <div class="panel-text">
+                        <span class="trip-name"><a href="javascript:displayEvents('${trip.id}')">${trip.name}</a></span><br>
+                        <span class="trip-location">${trip.location}</span><br>
+                        <span class="trip-dates">${trip.startDate} - ${trip.endDate}</span><br>
+                    </div>
+                    <div class="panel-controls">
+                        <button class="js-show-edit-trip-form"><img src="/assets/icons8-edit-16.png"> Edit</button>
+                        <button class="js-delete-trip"><img src="/assets/icons8-trash-can-16.png"> Delete</button>
+                    </div>
                 </div>
             </div>
             `);
@@ -233,15 +236,32 @@ function displayUserInfo() {
     }
 }
 
-function displayEditTrip(tripId) {
-    $(`.trip-content[data=${tripId}]`).html(`
-    <form id="js-trip-edit-form" data="${tripId}">
-        <input type="text" placeholder="Trip Name" name="name"><br>
-        <input type="text" placeholder="Location(s)" name="location"><br>
-        <input type="datetime" value="Start Date" name="startDate"><input type="datetime" value="End Date" name="endDate"><br>
-        <input type="submit">
-    </form>
-    `);
+function displayEditForm(tripId, panel) {
+    console.log("Displaying Edit Form");
+    fetch(`/trips/${tripId}`, {
+        method: 'get', 
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        }
+    })
+    .then(res => res.json())
+    .then(resJson => {
+        $(`.trip-content[data=${tripId}]`).children('.panel-text').html(`
+            <form class="js-edit-trip-form" data="${tripId}">
+                <input type="text" placeholder="Name" name="name" value="${resJson.name}"><br>
+                <input type="text" placeholder="Location" name="location" value="${resJson.location}"><br>
+                <input type="datetime" placeholder="Start Date" name="startDate" value="${resJson.startDate}">
+                <input type="datetime" placeholder="End Date" name="endDate" value="${resJson.endDate}"><br>
+            </form>
+        `);
+        panel.parent().css('visibility', 'visible');
+        panel.parent().html(`
+            <button class="js-edit-trip"><img src="/assets/icons8-edit-16.png"> Edit</button>
+            <button class="cancel-edit"><img src="/assets/icons8-delete-16.png"> Cancel</button>
+        `); 
+    });
+
 }
 
 function displayAddForm() {
@@ -276,6 +296,14 @@ function displayAddForm() {
     </form>
     `);
     displayModal();
+}
+
+function displayDeleteConfirmation(panel) {
+    panel.parent().css('visibility', 'visible');
+    panel.parent().html(`
+        <button class="delete-trip"><img src="/assets/icons8-trash-can-16.png"> Delete</button>
+        <button class="cancel-delete"><img src="/assets/icons8-delete-16.png"> Cancel</button>
+    `);
 }
 
 /**************************************************
@@ -313,8 +341,8 @@ function addTrip() {
 }
 
 function editTrip(tripId) {
-    let tripData = formToObject('#js-trip-edit-form')
-    console.log(JSON.stringify(tripData));
+    let tripData = formToObject('.js-edit-trip-form', tripId);
+    tripData.id = tripId;
     fetch(`/trips/${tripId}`, {
         method: 'put', 
         body: JSON.stringify(tripData),
@@ -352,28 +380,45 @@ function deleteTrip(tripId) {
     .catch('An error occurred');
 }
 
+function cancelDelete(panel) {
+    panel.parent().css('visibility', '');
+    panel.parent().html(`
+        <button class="js-edit-trip"><img src="/assets/icons8-edit-16.png"> Edit</button>
+        <button class="js-delete-trip"><img src="/assets/icons8-trash-can-16.png"> Delete</button>
+    `);
+}
+
 /*******************
  * EVENT LISTENER
- ********************/
+ *******************/
 
 function eventListener() {
     displayUserInfo();
     displayTrips();
-    $('.content').on('click', '.js-edit-trip', function(event) {
+
+    $('.content').on('click', '.js-show-edit-trip-form', function(event) {
         event.preventDefault();
-        displayEditTrip($(this).parent().attr('data'));
+        displayEditForm($(this).parents('.trip-content').attr('data'), $(this));
+    });
+    $('.content').on('click', '.delete-trip', function(event) {
+        event.preventDefault();
+        deleteTrip($(this).parents('.trip-content').attr('data'));
     });
     $('.content').on('click', '.js-delete-trip', function(event) {
         event.preventDefault();
-        deleteTrip($(this).parent().attr('data'));
+        displayDeleteConfirmation($(this));
+    });
+    $('.content').on('click', '.cancel-delete', function(event) {
+        event.preventDefault();
+        cancelDelete($(this));
     });
     $('.options').on('click', '.add-trip', function(event) {
         event.preventDefault();
         displayAddForm();
     });
-    $('.content').on('submit', '#js-trip-edit-form', function(event) {
+    $('.content').on('click', '.js-edit-trip', function(event) {
         event.preventDefault();
-        editTrip($(this).parent().attr('data'));
+        editTrip($(this).parents('.trip-content').attr('data'));
     });
     $('.modal').on('click', function(event) {
         //Only close the modal if the closest target is NOT "modal-content" (i.e. clicked inside the content box)
@@ -385,6 +430,10 @@ function eventListener() {
         event.preventDefault();
         signUp();
     });
+    $('.content').on('click', '.cancel-edit', function(event) {
+        event.preventDefault();
+        displayTrips();
+    })
 }
 
 $(eventListener);

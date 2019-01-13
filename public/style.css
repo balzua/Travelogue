@@ -79,6 +79,34 @@ input, button {
     );
     padding: 30px 10px 10px;
     width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+form.js-edit-trip-form input {
+    border-radius: 4px;
+    background-color: rgba(0, 0, 0, 0.6);
+    box-shadow: none;
+    color: white;
+    font-size: 16px;
+    margin-top: 2px;
+}
+
+form.js-edit-trip-form {
+    margin-bottom: 0;
+}
+
+.panel-controls {
+    visibility: hidden;
+}
+
+.panel-controls img {
+    vertical-align: middle;
+}
+
+.grid-item:hover .panel-controls {
+    visibility: visible;
 }
 
 .trip-name {
