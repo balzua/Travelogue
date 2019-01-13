@@ -9,7 +9,6 @@ const router = express.Router();
 
 router.get('/', (req, res) => {
     const tripId = req.query.trip;
-    console.log(req.query.trip);
     Event.find({user: req.user.username, trip: tripId})
     .then(events => {
         res.status(200).send(events.map(event => event.serialize()));
@@ -29,7 +28,7 @@ router.post('/', jsonParser, (req, res) => {
         }
     }); 
     if (missingFields.length > 0) {
-        return res.status(400).send(`Missing fields: ${missingFields.join(' ')}`);
+        return res.status(400).json({message: `Missing fields: ${missingFields.join(' ')}`});
     }
     Trip.findById(req.body.trip)
     .then(trip => {

@@ -23,19 +23,6 @@ function formToObject(form) {
     return formData;
 }
 
-function randomPageImage() {
-    const path = '/assets/panes';
-    const images = ['china', 'japan', 'new-york', 'palm-trees', 
-    'paris', 'rio', 'savannah', 'sydney', 'travel', 'venice'];
-    const random = Math.floor(Math.random() * (images.length));
-    return `${path}/${images[random]}.jpg`;
-}
-
-function displayEvents(tripId) {
-    console.log("Switching to Event View");
-    $('.content').html('');
-}
-
 function removeModal() {
     $('.modal').addClass('hidden');
 }
@@ -44,9 +31,41 @@ function displayModal() {
     $('.modal').removeClass('hidden');
 }
 
-//TODO: Implement This
-function displayTripDetails(tripId) {
-    $('.content').html('');
+function randomPageImage() {
+    const path = '/assets/panes';
+    const images = ['china', 'japan', 'new-york', 'palm-trees', 
+    'paris', 'rio', 'savannah', 'sydney', 'travel', 'venice'];
+    const random = Math.floor(Math.random() * (images.length));
+    return `${path}/${images[random]}.jpg`;
+}
+
+/****************************
+ * USER SIGNUP/LOGIN FUNCTIONS
+ ****************************/
+
+function login() {
+    const loginData = formToObject('#js-login');
+    fetch('/auth/login', {
+        method: 'post',
+        body: JSON.stringify(loginData),
+        headers: {
+            "Content-Type": "application/json",
+        }
+    })
+    .then(res => {
+        if (res.ok) {
+            return res.json();
+        }
+        throw new Error('Invalid username/password combination.');
+    })
+    .then(responseJson => {
+        localStorage.setItem('authToken', responseJson.authToken);
+        localStorage.setItem('user', responseJson.user);
+        location.reload();
+    })
+    .catch(err => {
+        $('.modal-error').text(err.message);
+    });
 }
 
 function logout() {
@@ -55,58 +74,39 @@ function logout() {
     location.reload();
 }
 
-function displayUserInfo() {
-    $('.userinfo').html('');
-    const user = localStorage.getItem('user');
-    if(user) {
-        $('.userinfo').append(`Welcome, ${user} | <a href="javascript:logout()">Logout</a>`);
-    }
-    else {
-        $('.userinfo').append(`Welcome: <a href="javascript:displayLogin()">Login</a> | <a href="javascript:displaySignUpForm()">Signup</a>`);
-    }
-}
-
-function displayEditTrip(tripId) {
-    $(`.trip-content[data=${tripId}]`).html(`
-    <form id="js-trip-edit-form" data="${tripId}">
-        <input type="text" placeholder="Trip Name" name="name"><br>
-        <input type="text" placeholder="Location(s)" name="location"><br>
-        <input type="datetime" value="Start Date" name="startDate"><input type="datetime" value="End Date" name="endDate"><br>
-        <input type="submit">
-    </form>
-    `);
-}
-
-function displayAddForm() {
-    $('.modal-content').html(`
-    <div class="pane"><img src="/assets/panes/new-trip.jpg"></div>
-    <h2>Add Trip</h2>
-    <form id="js-trip-add-form" action="javascript:addTrip()">
-        <div class="form-line">
-            <label for="name">Trip Name</label>
-            <input type="text" placeholder="e.g. My Summer Vacation" name="name" id="name">
-        </div>
-        <div class="form-line">
-            <label for="location">Location</label>
-            <input type="text" placeholder="e.g. Florida" name="location" id="location">
-        </div>
-        <div class="form-line">
-            <label for="startDate">Start Date</label>
-            <input type="datetime" placeholder="e.g. 1/5/2018" name="startDate" id="startDate">
-        </div>
-        <div class="form-line">
-            <label for="endDate">End Date</label> 
-            <input type="datetime" placeholder="e.g. 1/12/2018" name="endDate" id="endDate">
-        </div>
-        <div class="form-line">
-            <label for="background">Image URL</label>
-            <input type="text" placeholder="optional" name="background" id="background">
-        </div>
-        <br>
-        <input type="submit">
-    </form>
-    `);
-    displayModal();
+function signUp() {
+    const loginData = formToObject('#js-signup');
+    fetch('/users', {
+        method: 'post',
+        body: JSON.stringify(loginData),
+        headers: {
+            "Content-Type": "application/json",
+        }
+    })
+    .then(parseJSON)
+    .then(res => {
+        if (res.ok) {
+            fetch('/auth/login', {
+                method: 'post',
+                body: JSON.stringify(loginData),
+                headers: {
+                    "Content-Type": "application/json",
+                }
+            })
+            .then(res => res.json())
+            .then(responseJson => {
+                localStorage.setItem('authToken', responseJson.authToken);
+                localStorage.setItem('user', responseJson.user);
+                location.reload();
+            })
+        }
+        else {
+            throw new Error(res.json.message);
+        }
+    })
+    .catch(err => {
+        $('.modal-error').text(err.message);
+    });
 }
 
 function displayLogin() {
@@ -153,65 +153,134 @@ function displaySignUpForm() {
     displayModal();
 }
 
-function login() {
-    const loginData = formToObject('#js-login');
-    fetch('/auth/login', {
-        method: 'post',
-        body: JSON.stringify(loginData),
+/****************************
+ * PAGE DISPLAY FUNCTIONS
+ ****************************/
+
+function displayTrips() {
+    console.log(token);
+    $('.content').html('');
+    fetch('/trips', {
         headers: {
-            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
         }
     })
-    .then(res => {
-        if (res.ok) {
-            return res.json();
-        }
-        throw new Error('Invalid username/password combination.');
-    })
-    .then(responseJson => {
-        localStorage.setItem('authToken', responseJson.authToken);
-        localStorage.setItem('user', responseJson.user);
-        location.reload();
-    })
-    .catch(err => {
-        $('.modal-error').text(err.message);
+    .then(res => res.json())
+    .then(trips => {
+        trips.forEach(trip => {
+            $('.content').append(`
+            <div class="grid-item">
+                <div class="trip-content" data="${trip.id}">
+                    <span class="trip-name"><a href="javascript:displayEvents('${trip.id}')">${trip.name}</a></span><br>
+                    <span class="trip-location">${trip.location}</span><br>
+                    <span class="trip-dates">${trip.startDate} - ${trip.endDate}</span><br>
+                    <button class="js-edit-trip">Edit</button>
+                    <button class="js-delete-trip">Delete</button>
+                </div>
+            </div>
+            `);
+            $('.content').children().last().css("background-image", "url('" + trip.background + "')");
+        });
     });
 }
 
-function signUp() {
-    const loginData = formToObject('#js-signup');
-    fetch('/users', {
-        method: 'post',
-        body: JSON.stringify(loginData),
+function displayEvents(tripId) {
+    console.log("Switching to Event View");
+    $('.content').html('');
+    const eventPromise = fetch(`/events?trip=${tripId}`, {
         headers: {
-            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
         }
-    })
-    .then(parseJSON)
-    .then(res => {
-        if (res.ok) {
-            fetch('/auth/login', {
-                method: 'post',
-                body: JSON.stringify(loginData),
-                headers: {
-                    "Content-Type": "application/json",
-                }
-            })
-            .then(res => res.json())
-            .then(responseJson => {
-                localStorage.setItem('authToken', responseJson.authToken);
-                localStorage.setItem('user', responseJson.user);
-                location.reload();
-            })
+    }).then(res => res.json());
+    const tripPromise = fetch(`/trips/${tripId}`, {
+        headers: {
+            "Authorization": `Bearer ${token}`
         }
-        else {
-            throw new Error(res.json.message);
-        }
-    })
-    .catch(err => {
-        $('.modal-error').text(err.message);
+    }).then(res => res.json());
+    Promise.all([eventPromise, tripPromise])
+    .then(data => {
+        const events = data[0];
+        const trip = data[1];
+        events.forEach(event => {
+            $('.options').html(`
+            <h2>${trip.name}</h2>
+            <a href="javascript:displayAddEventForm()">Add Event</a>
+            `);
+            $('.content').append(`
+            <div class="grid-item">
+                <div class="trip-content" data="${event.id}">
+                    <span class="trip-name">${event.name}</a></span><br>
+                    <span class="trip-location">${event.location}</span><br>
+                    <span class="trip-dates">${event.dateTime}</span><br>
+                    <button class="js-edit-event">Edit</button>
+                    <button class="js-delete-event">Delete</button>
+                </div>
+            </div>
+            `);
+            $('.content').children().last().css("background-image", "url('" + event.image + "')");
+        });
     });
 }
+
+function displayUserInfo() {
+    $('.userinfo').html('');
+    const user = localStorage.getItem('user');
+    if(user) {
+        $('.userinfo').append(`Welcome, ${user} | <a href="javascript:logout()">Logout</a>`);
+    }
+    else {
+        $('.userinfo').append(`Welcome: <a href="javascript:displayLogin()">Login</a> | <a href="javascript:displaySignUpForm()">Signup</a>`);
+    }
+}
+
+function displayEditTrip(tripId) {
+    $(`.trip-content[data=${tripId}]`).html(`
+    <form id="js-trip-edit-form" data="${tripId}">
+        <input type="text" placeholder="Trip Name" name="name"><br>
+        <input type="text" placeholder="Location(s)" name="location"><br>
+        <input type="datetime" value="Start Date" name="startDate"><input type="datetime" value="End Date" name="endDate"><br>
+        <input type="submit">
+    </form>
+    `);
+}
+
+function displayAddForm() {
+    $('.modal-content').html(`
+    <div class="pane"><img src="/assets/panes/new-trip.jpg"></div>
+    <h2>Add Trip</h2>
+    <form id="js-trip-add-form" action="javascript:addTrip()">
+        <div class="modal-error">
+        </div>
+        <div class="form-line">
+            <label for="name">Trip Name</label>
+            <input type="text" placeholder="e.g. My Summer Vacation" name="name" id="name" required>
+        </div>
+        <div class="form-line">
+            <label for="location">Location</label>
+            <input type="text" placeholder="e.g. Florida" name="location" id="location" required>
+        </div>
+        <div class="form-line">
+            <label for="startDate">Start Date</label>
+            <input type="datetime" placeholder="e.g. 1/5/2018" name="startDate" id="startDate" required>
+        </div>
+        <div class="form-line">
+            <label for="endDate">End Date</label> 
+            <input type="datetime" placeholder="e.g. 1/12/2018" name="endDate" id="endDate" required>
+        </div>
+        <div class="form-line">
+            <label for="background">Image URL</label>
+            <input type="text" placeholder="optional" name="background" id="background">
+        </div>
+        <br>
+        <input type="submit">
+    </form>
+    `);
+    displayModal();
+}
+
+/**************************************************
+ * PAGE FUNCTIONS - ADD, DELETE, EDIT (TRIPS)
+ **************************************************/
 
 function addTrip() {
     //Get values from form, format into post request, submit, then check status code.
@@ -224,18 +293,23 @@ function addTrip() {
             "Authorization": `Bearer ${token}`
         }
     })
+    .then(parseJSON)
     .then(res => {
         if (res.ok) {
             //TODO: Post successful - display feedback
-            removalModal();
-            displayTrips();
+            removeModal();
+            location.reload();
         } 
         else {
             //TODO: Error handling
-            throw new Error(res.statusText);
+            console.log(res);
+            throw new Error(res.json.message);
         }
     })
-    .catch('An error occurred');
+    .catch(err => {
+        console.log(err.message);
+        $('.modal-error').text(err.message);
+    });
 }
 
 function editTrip(tripId) {
@@ -278,32 +352,9 @@ function deleteTrip(tripId) {
     .catch('An error occurred');
 }
 
-function displayTrips() {
-    console.log(token);
-    $('.content').html('');
-    fetch('/trips', {
-        headers: {
-            "Authorization": `Bearer ${token}`
-        }
-    })
-    .then(res => res.json())
-    .then(trips => {
-        trips.forEach(trip => {
-            $('.content').append(`
-            <div class="grid-item">
-                <div class="trip-content" data="${trip.id}">
-                    <span class="trip-name"><a href="javascript:displayEvents('${trip.id}')">${trip.name}</a></span><br>
-                    <span class="trip-location">${trip.location}</span><br>
-                    <span class="trip-dates">${trip.startDate} - ${trip.endDate}</span><br>
-                    <button class="js-edit-trip">Edit</button>
-                    <button class="js-delete-trip">Delete</button>
-                </div>
-            </div>
-            `);
-            $('.content').children().last().css("background-image", "url('" + trip.background + "')");
-        });
-    });
-}
+/*******************
+ * EVENT LISTENER
+ ********************/
 
 function eventListener() {
     displayUserInfo();

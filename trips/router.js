@@ -41,7 +41,7 @@ router.post('/', jsonParser, (req, res) => {
         }
     }); 
     if (missingFields.length > 0) {
-        return res.status(400).send(`Missing fields: ${missingFields.join(' ')}`);
+        return res.status(400).json({message: `Missing fields: ${missingFields.join(' ')}`});
     }
     const newTrip = req.body;
     newTrip.user = req.user.username;
