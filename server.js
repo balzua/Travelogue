@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const passport = require('passport');
 const {router: tripRouter} = require('./trips');
 const {router: usersRouter} = require('./users');
+const {router: eventRouter} = require('./events');
 const {router: authRouter, jwtStrategy} = require('./auth');
 
 //Mongoose promise fix
@@ -25,6 +26,7 @@ let server;
 app.use('/users', usersRouter);
 app.use('/auth', authRouter);
 app.use('/trips', jwtAuth, tripRouter);
+app.use('/events', jwtAuth, eventRouter);
 
 function runServer(databaseUrl, port=PORT) {
   return new Promise((resolve, reject) => {

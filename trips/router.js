@@ -20,6 +20,7 @@ router.get('/', (req, res) => {
 });
 
 router.get('/:id', (req, res) => {
+    //Fix to only allow user
     Trip.findById(req.params.id)
     .then(trip => {
         res.status(200).json(trip.serialize());
