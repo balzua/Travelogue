@@ -159,6 +159,7 @@ function displaySignUpForm() {
 
 function displayTrips() {
     $('.content').html('');
+    $('.options').html('<h2>My Trips</h2><a href="javascript:displayAddTripForm()">Add Trip</a>');
     fetch('/trips', {
         headers: {
             "Authorization": `Bearer ${token}`
@@ -204,11 +205,15 @@ function displayEvents(tripId) {
     .then(data => {
         const events = data[0];
         const trip = data[1];
-        events.forEach(event => {
-            $('.options').html(`
+        $('.options').html(`
             <h2>${trip.name}</h2>
-            <a href="javascript:displayAddEventForm()">Add Event</a>
-            `);
+            <a href="javascript:displayAddEventForm('${trip.name}')">Add Event</a>
+            <a href="javascript:displayTrips()">All Trips</a>
+        `);
+        if (events.length === 0) {
+            $('.options').append('<br>No events yet. <a href="javascript:displayAddEventForm()">Add One?</a>');
+        }
+        events.forEach(event => {
             $('.content').append(`
             <div class="grid-item">
                 <div class="trip-content" data="${event.id}">
@@ -264,7 +269,7 @@ function displayEditForm(tripId, panel) {
 
 }
 
-function displayAddForm() {
+function displayAddTripForm() {
     $('.modal-content').html(`
     <div class="pane"><img src="/assets/panes/new-trip.jpg"></div>
     <h2>Add Trip</h2>
@@ -290,6 +295,41 @@ function displayAddForm() {
         <div class="form-line">
             <label for="background">Image URL</label>
             <input type="text" placeholder="optional" name="background" id="background">
+        </div>
+        <br>
+        <input type="submit">
+    </form>
+    `);
+    displayModal();
+}
+
+function displayAddEventForm(tripName) {
+    $('.modal-content').html(`
+    <div class="pane"><img src="/assets/panes/new-event.jpg"></div>
+    <h2>Add Event</h2>
+    Adding event to ${tripName}<br>
+    <form id="js-add-event-form" action="javascript:addEvent()">
+        <div class="modal-error">
+        </div>
+        <div class="form-line">
+            <label for="name">Event Name</label>
+            <input type="text" placeholder="e.g. Dinner" name="name" id="name" required>
+        </div>
+        <div class="form-line">
+            <label for="location">Location</label>
+            <input type="text" placeholder="e.g. Eiffel Tower" name="location" id="location" required>
+        </div>
+        <div class="form-line">
+            <label for="dateTime">Date/Time</label>
+            <input type="text" placeholder="e.g. 6:00 10/29/2014" name="dateTime" id="dateTime">
+        </div>
+        <div class="form-line">
+            <label for="image">Image URL</label>
+            <input type="text" placeholder="optional" name="image" id="image">
+        </div>
+        <div class="form-line">
+            <label for="description">Description</label>
+            <textarea placeholder="optional" name="description" id="description"></textarea>
         </div>
         <br>
         <input type="submit">
@@ -414,7 +454,7 @@ function eventListener() {
     });
     $('.options').on('click', '.add-trip', function(event) {
         event.preventDefault();
-        displayAddForm();
+        displayAddTripForm();
     });
     $('.content').on('click', '.js-edit-trip', function(event) {
         event.preventDefault();
