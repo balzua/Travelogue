@@ -28,6 +28,7 @@ const EventSchema = mongoose.Schema({
 
 EventSchema.methods.serialize = function () {
     return {
+        id: this._id,
         name: this.name,
         dateTime: this.dateTime,
         location: this.location,

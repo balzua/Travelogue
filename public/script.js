@@ -14,7 +14,13 @@ function parseJSON(response) {
 //Pass the form ID as an argument
 function formToObject(form, tripId) {
     let formData = {};
-    const rawForm = $(`${form}[data=${tripId}]`).serializeArray();
+    let rawForm;
+    if (tripId) {
+        rawForm = $(`${form}[data=${tripId}]`).serializeArray();
+    }
+    else {
+        rawForm = $(`${form}`).serializeArray();
+    }
     rawForm.forEach(input => {  
         if (input.value != '') {
             formData[input.name] = input.value;  
@@ -207,26 +213,32 @@ function displayEvents(tripId) {
         const trip = data[1];
         $('.options').html(`
             <h2>${trip.name}</h2>
-            <a href="javascript:displayAddEventForm('${trip.name}')">Add Event</a>
+            <a href="javascript:displayAddEventForm('${trip.name}', '${trip.id}')">Add Event</a>
             <a href="javascript:displayTrips()">All Trips</a>
         `);
         if (events.length === 0) {
             $('.options').append('<br>No events yet. <a href="javascript:displayAddEventForm()">Add One?</a>');
         }
+        console.log(events);
         events.forEach(event => {
             $('.content').append(`
             <div class="grid-item">
                 <div class="trip-content" data="${event.id}">
+                <div class="panel-text">
                     <span class="trip-name">${event.name}</a></span><br>
                     <span class="trip-location">${event.location}</span><br>
                     <span class="trip-dates">${event.dateTime}</span><br>
-                    <button class="js-edit-event">Edit</button>
-                    <button class="js-delete-event">Delete</button>
+                </div>
+                    <div class="panel-controls">
+                        <button class="js-edit-event">Edit</button>
+                        <button class="js-delete-event">Delete</button>
+                    </div>
                 </div>
             </div>
             `);
             $('.content').children().last().css("background-image", "url('" + event.image + "')");
         });
+        $('.content').attr('data', trip.id);
     });
 }
 
@@ -303,12 +315,12 @@ function displayAddTripForm() {
     displayModal();
 }
 
-function displayAddEventForm(tripName) {
+function displayAddEventForm(tripName, tripId) {
     $('.modal-content').html(`
     <div class="pane"><img src="/assets/panes/new-event.jpg"></div>
     <h2>Add Event</h2>
     Adding event to ${tripName}<br>
-    <form id="js-add-event-form" action="javascript:addEvent()">
+    <form id="js-add-event-form" action="javascript:addEvent('${tripId}')">
         <div class="modal-error">
         </div>
         <div class="form-line">
@@ -346,14 +358,23 @@ function displayDeleteConfirmation(panel) {
     `);
 }
 
+function displayEventDeleteConfirmation(panel) {
+    panel.parent().css('visibility', 'visible');
+    panel.parent().html(`
+        <button class="delete-event"><img src="/assets/icons8-trash-can-16.png"> Delete</button>
+        <button class="cancel-event-delete"><img src="/assets/icons8-delete-16.png"> Cancel</button>
+    `);
+}
+
 /**************************************************
  * PAGE FUNCTIONS - ADD, DELETE, EDIT (TRIPS)
  **************************************************/
 
 function addTrip() {
     //Get values from form, format into post request, submit, then check status code.
-    let tripData = formToObject('#js-trip-add-form')
-    fetch('/trips', {
+    let tripData = formToObject('#js-trip-add-form');
+    console.log(tripData);
+    fetch(`/trips`, {
         method: 'post', 
         body: JSON.stringify(tripData),
         headers: {
@@ -366,7 +387,7 @@ function addTrip() {
         if (res.ok) {
             //TODO: Post successful - display feedback
             removeModal();
-            location.reload();
+            displayTrips();
         } 
         else {
             //TODO: Error handling
@@ -428,6 +449,64 @@ function cancelDelete(panel) {
     `);
 }
 
+/**************************************************
+ * PAGE FUNCTIONS - ADD, DELETE, EDIT (EVENTS)
+ **************************************************/
+
+function addEvent(tripId) {
+    let tripData = formToObject('#js-add-event-form');
+    tripData.trip = tripId;
+    fetch(`/events?trip=${tripId}`, {
+        method: 'post', 
+        body: JSON.stringify(tripData),
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        }
+    })
+    .then(parseJSON)
+    .then(res => {
+        if (res.ok) {
+            //TODO: Post successful - display feedback
+            removeModal();
+            displayEvents(tripId);
+        } 
+        else {
+            //TODO: Error handling
+            throw new Error(res.json.message);
+        }
+    })
+    .catch(err => {
+        console.log(err.message);
+        $('.modal-error').text(err.message);
+    });
+}
+
+function deleteEvent(eventId) {
+    console.log("Deleting Event");
+    fetch(`/events/${eventId}`, {method: 'delete', headers: {"Authorization": `Bearer ${token}`}})
+    .then(res => {
+        if (res.ok) {
+            //Delete successful - display feedback
+            const tripId = $('.content').attr('data');
+            displayEvents(tripId);
+        }
+        else {
+            //TODO: Better error handling
+            throw new Error(res.statusText);
+        }
+    })
+    .catch('An error occurred');
+}
+
+function cancelEventDelete(panel) {
+    panel.parent().css('visibility', '');
+    panel.parent().html(`
+        <button class="js-edit-trip"><img src="/assets/icons8-edit-16.png"> Edit</button>
+        <button class="js-delete-trip"><img src="/assets/icons8-trash-can-16.png"> Delete</button>
+    `);
+}
+
 /*******************
  * EVENT LISTENER
  *******************/
@@ -473,7 +552,19 @@ function eventListener() {
     $('.content').on('click', '.cancel-edit', function(event) {
         event.preventDefault();
         displayTrips();
-    })
+    });
+    $('.content').on('click', '.js-delete-event', function(event) {
+        event.preventDefault();
+        displayEventDeleteConfirmation($(this));
+    });
+    $('.content').on('click', '.delete-event', function(event) {
+        event.preventDefault();
+        deleteEvent($(this).parents('.trip-content').attr('data'));
+    });
+    $('.content').on('click', '.cancel-event-delete', function(event) {
+        event.preventDefault();
+        cancelEventDelete($(this));
+    });
 }
 
 $(eventListener);
