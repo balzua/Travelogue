@@ -17,21 +17,23 @@ chai.use(chaiHttp);
 
 function seedEvents() {
     let seedData = [];
-    for (let i = 0; i < 1; i++) {
-        Trip.findOne()
-        .then(trip => {
-            const newEvent = {
+    return Trip.findOne()
+    .then(trip => {
+        return trip._id;
+    })
+    .then(tripId => {
+        for (let i = 0; i < 2; i++) {
+            seedData.push({
                 name: faker.lorem.words(),
                 location: faker.address.country(),
-                dateTime: faker.date.past(2),
-                image: 'fakeUrl',
                 description: faker.lorem.sentences(),
-                trip: trip._id
-            }
-            seedData.push(newEvent);
-        });
-    }
-    return Event.insertMany(seedData);
+                dateTime: faker.date.past(2),
+                user: 'testUser',
+                trip: tripId
+            })
+        }
+        return Event.insertMany(seedData);
+    });
 }
 
 function seedTrips() {
@@ -72,9 +74,12 @@ describe('Test Server', function () {
     });
 
     beforeEach(function () {
-        return seedTrips()
-        .then(seedEvents);
+        return seedTrips();
     });
+
+    beforeEach(function () {
+        return seedEvents();
+    })
 
     beforeEach(function () {
         return User.hashPassword(password).then(password => {
@@ -287,32 +292,29 @@ describe('Test Server', function () {
                 .then(function(res) {
                     expect(res).to.have.status(204);
                     Trip.findById(deleteTrip._id);
-                })
+                });
             });
         });
-    
     });
 
     describe('Event API', function () {
 
         describe('GET endpoints', function () {
-
             it('should retrieve all events given a trip ID', function () {
-                let tripId;
                 Trip.findOne()
                 .then(trip => {
-                    tripId = trip._id;
+                    let res;
                     return chai.request(app)
                     .get(`/events/?trip=${trip._id}`)
                     .set('authorization', `Bearer ${token}`)
-                })
-                .then(res => {
-                    expect(res).to.have.status(200);
-                    expect(res.body).to.have.lengthOf.at.least(1);
-                    return Event.count({trip: tripId});
-                })
-                .then(function (count) {
-                    expect(res.body).to.have.lengthOf(count);
+                    .then(_res => {
+                        res = _res;
+                        expect(res).to.have.status(200);
+                        return Event.count({trip: trip._id});
+                    })
+                    .then(function (count) {
+                        expect(res.body).to.have.lengthOf(count);
+                    });
                 });
             });
         });
@@ -320,27 +322,89 @@ describe('Test Server', function () {
         describe('POST endpoints', function () {
 
             it('should create an event for a given trip ID', function () {
-
+                let newEvent;
+                return Trip.findOne()
+                .then(trip => {
+                    return newEvent = {
+                        name: faker.lorem.words(),
+                        location: faker.address.country(),
+                        dateTime: faker.date.past(2),
+                        image: 'fakeUrl',
+                        description: faker.lorem.sentences(),
+                        trip: trip._id
+                    }
+                })
+                .then(createdEvent => {
+                    return chai.request(app)
+                    .post('/events')
+                    .set('authorization', `Bearer ${token}`)
+                    .send(createdEvent)
+                })
+                .then(res => {
+                    expect(res).to.have.status(201);
+                    expect(res).to.be.json;
+                    expect(res).to.be.a('object');
+                    expect(res.body).to.include.keys(['name', 'location', 'dateTime', 'image', 'description', 'trip', 'id']);
+                    expect(res.body.name).to.equal(newEvent.name);
+                    expect(res.body.location).to.equal(newEvent.location);
+                    expect(res.body.dateTime).to.equal(newEvent.dateTime.toDateString());
+                    expect(res.body.description).to.equal(newEvent.description);
+                    expect(res.body.id).to.not.be.null;
+                    return Event.findById(res.body.id);
+                })
+                .then(dbPost => {
+                    dbPost = dbPost.serialize();
+                    expect(dbPost.name).to.equal(newEvent.name);
+                    expect(dbPost.location).to.equal(newEvent.location);
+                    expect(dbPost.dateTime).to.equal(newEvent.dateTime.toDateString());
+                    expect(dbPost.description).to.equal(newEvent.description);
+                });
             });
-
         });
 
         describe('PUT endpoints', function () {
 
-            it('should create an event for a given event ID', function () {
-
+            it('should update an event when supplied with editable data', function () {
+                const updateData = {
+                    name: faker.lorem.words(),
+                    location: faker.address.country()
+                };
+                return Event.findOne()
+                .then(function (toUpdateEvent) {
+                    updateData.id = toUpdateEvent._id;
+                    return chai.request(app).put(`/events/${updateData.id}`)
+                    .set('authorization', `Bearer ${token}`)
+                    .send(updateData);
+                })
+                .then(res => {
+                    expect(res).to.have.status(204);
+                    return Event.findById(updateData.id);
+                })
+                .then(updatedEvent => {
+                    console.log(updatedEvent._id);
+                    expect(updateData.name).to.equal(updatedEvent.name);
+                    expect(updateData.location).to.equal(updatedEvent.location);
+                });
             });
-
         });
-
+ 
         describe('DELETE endpoints', function () {
 
             it('should delete an event for a given event ID', function () {
-
+                let deleteEvent;
+                return Event.findOne()
+                .then(_deleteEvent => {
+                    deleteEvent = _deleteEvent;
+                    return chai.request(app)
+                    .delete(`/events/${deleteEvent._id}`)
+                    .set('authorization', `Bearer ${token}`);
+                })
+                .then(function(res) {
+                    expect(res).to.have.status(204);
+                    Event.findById(deleteEvent._id);
+                });
             });
-
         });
 
     });
-
 });

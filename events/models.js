@@ -30,10 +30,11 @@ EventSchema.methods.serialize = function () {
     return {
         id: this._id,
         name: this.name,
-        dateTime: this.dateTime,
+        dateTime: this.dateTime.toDateString(),
         location: this.location,
-        descripttion: this.description,
-        image: this.image
+        description: this.description,
+        image: this.image,
+        trip: this.trip
     };
 }
 

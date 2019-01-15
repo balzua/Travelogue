@@ -24,6 +24,7 @@ router.post('/', jsonParser, (req, res) => {
     let missingFields = [];
     requiredFields.forEach(field => {
         if (!(field in req.body)) {
+            console.log(field);
             missingFields.push(field);
         }
     }); 
@@ -32,7 +33,7 @@ router.post('/', jsonParser, (req, res) => {
     }
     Trip.findById(req.body.trip)
     .then(trip => {
-        if (trip.user != req.user.username) {
+        if (trip.user != req.user.username) { 
             return res.status(401).json({message: 'Unauthorized: trip does not belong to you'});
         }
         else {
@@ -63,8 +64,8 @@ router.put('/:id', jsonParser, (req, res) => {
         updated[field] = req.body[field];
       }
     });
-    Event.findOneAndUpdate({_id: req.params.id, user: req.user.username})
-    .then(event => {
+    Event.findOneAndUpdate({_id: req.params.id, user: req.user.username}, {$set: updated})
+    .then(() => {
         res.status(204).end();
     })
     .catch(err => {
