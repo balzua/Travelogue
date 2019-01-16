@@ -19,6 +19,17 @@ router.get('/', (req, res) => {
     });
 });
 
+router.get('/:id', (req, res) => {
+    Event.findOne({user: req.user.username, _id: req.params.id})
+    .then(event => {
+        res.status(200).send(event.serialize());
+    })
+    .catch(err => {
+        console.error(err);
+        res.status(500).json({message: 'Internal Server Error'});
+    })
+});
+
 router.post('/', jsonParser, (req, res) => {
     const requiredFields = ['name', 'location', 'trip'];
     let missingFields = [];

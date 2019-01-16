@@ -183,7 +183,7 @@ function displayTrips() {
                         <span class="trip-dates">${trip.startDate} - ${trip.endDate}</span><br>
                     </div>
                     <div class="panel-controls">
-                        <button class="js-show-edit-event-form"><img src="/assets/icons8-edit-16.png"> Edit</button>
+                        <button class="js-show-edit-trip-form"><img src="/assets/icons8-edit-16.png"> Edit</button>
                         <button class="js-delete-event"><img src="/assets/icons8-trash-can-16.png"> Delete</button>
                     </div>
                 </div>
@@ -245,7 +245,7 @@ function displayEvents(tripId) {
                         <span class="event-location">${event.location}</span><br>
                     </div>
                     <div class="event-controls">
-                        <button class="js-edit-event"><img src="/assets/icons8-edit-16.png">Edit</button>
+                        <button class="js-show-edit-event-form"><img src="/assets/icons8-edit-16.png">Edit</button>
                         <button class="js-delete-event"><img src="/assets/icons8-trash-can-16.png">Delete</button>
                     </div>
                 </div>
@@ -274,7 +274,6 @@ function displayUserInfo() {
 }
 
 function displayEditForm(tripId, panel) {
-    console.log("Displaying Edit Form");
     fetch(`/trips/${tripId}`, {
         method: 'get', 
         headers: {
@@ -298,7 +297,33 @@ function displayEditForm(tripId, panel) {
             <button class="cancel-edit"><img src="/assets/icons8-delete-16.png"> Cancel</button>
         `); 
     });
+}
 
+function displayEditEventForm(eventId, panel) {
+    fetch(`/events/${eventId}`, {
+        method: 'get', 
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        }
+    })
+    .then(res => res.json())
+    .then(resJson => {
+        $(`.event-item[data=${eventId}]`).find('.event-text').html(`
+            <form class="js-edit-event-form" data="${eventId}">
+                <input type="text" placeholder="Name" name="name" value="${resJson.name}"><br>
+                <input type="text" placeholder="Location" name="location" value="${resJson.location}"><br>
+                <input type="datetime" placeholder="Date/Time" name="dateTime" value="${resJson.dateTime || ''}"><br>
+                <textarea placeholder="Description" name="description" value="${resJson.description || ''}"></textarea><br>
+                <input type="text" placeholder="Image URL" name="image" value="${resJson.image || ''}">
+            </form>
+        `);
+        panel.parent().css('visibility', 'visible');
+        panel.parent().html(`
+            <button class="js-edit-event"><img src="/assets/icons8-edit-16.png"> Edit</button>
+            <button class="cancel-event-edit"><img src="/assets/icons8-delete-16.png"> Cancel</button>
+        `); 
+    });
 }
 
 function displayAddTripForm() {
@@ -393,7 +418,6 @@ function displayEventDeleteConfirmation(panel) {
 function addTrip() {
     //Get values from form, format into post request, submit, then check status code.
     let tripData = formToObject('#js-trip-add-form');
-    console.log(tripData);
     fetch(`/trips`, {
         method: 'post', 
         body: JSON.stringify(tripData),
@@ -409,7 +433,6 @@ function addTrip() {
             displayTrips();
         } 
         else {
-            console.log(res);
             throw new Error(res.json.message);
         }
     })
@@ -493,8 +516,31 @@ function addEvent(tripId) {
     });
 }
 
+function editEvent(eventId) {
+    let eventData = formToObject('.js-edit-event-form', eventId);
+    eventData.id = eventId;
+    fetch(`/events/${eventId}`, {
+        method: 'put', 
+        body: JSON.stringify(eventData),
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        }
+    })
+    .then(res => {
+        if (res.ok) {
+            const tripId = $('.content').attr('data');
+            displayEvents(tripId);
+        } 
+        else {
+            throw new Error(res.statusText);
+        }
+    })
+    .catch('An error occurred');
+
+}
+
 function deleteEvent(eventId) {
-    console.log("Deleting Event");
     fetch(`/events/${eventId}`, {method: 'delete', headers: {"Authorization": `Bearer ${token}`}})
     .then(res => {
         if (res.ok) {
@@ -527,6 +573,10 @@ function eventListener() {
     $('.content').on('click', '.js-show-edit-trip-form', function(event) {
         event.preventDefault();
         displayEditForm($(this).parents('.trip-content').attr('data'), $(this));
+    });
+    $('.content').on('click', '.js-show-edit-event-form', function(event) {
+        event.preventDefault();
+        displayEditEventForm($(this).parents('.event-item').attr('data'), $(this));
     });
     $('.content').on('click', '.delete-trip', function(event) {
         event.preventDefault();
@@ -562,6 +612,11 @@ function eventListener() {
         event.preventDefault();
         displayTrips();
     });
+    $('.content').on('click', '.cancel-event-edit', function(event) {
+        event.preventDefault();
+        const tripId = $('.content').attr('data');
+        displayEvents(tripId);
+    });
     $('.content').on('click', '.js-delete-event', function(event) {
         event.preventDefault();
         displayEventDeleteConfirmation($(this));
@@ -573,6 +628,10 @@ function eventListener() {
     $('.content').on('click', '.cancel-event-delete', function(event) {
         event.preventDefault();
         cancelEventDelete($(this));
+    });
+    $('.content').on('click', '.js-edit-event', function(event) {
+        event.preventDefault();
+        editEvent($(this).parents('.event-item').attr('data'));
     });
 }
 
