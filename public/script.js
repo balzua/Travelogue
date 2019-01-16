@@ -184,7 +184,7 @@ function displayTrips() {
                     </div>
                     <div class="panel-controls">
                         <button class="js-show-edit-trip-form"><img src="/assets/icons8-edit-16.png"> Edit</button>
-                        <button class="js-delete-event"><img src="/assets/icons8-trash-can-16.png"> Delete</button>
+                        <button class="js-delete-trip"><img src="/assets/icons8-trash-can-16.png"> Delete</button>
                     </div>
                 </div>
             </div>
