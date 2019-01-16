@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const axios = require('axios');
 const {Trip} = require('./models');
+const {Event} = require('../events/models');
 
 const jsonParser = bodyParser.json();
 const router = express.Router();
@@ -95,8 +96,9 @@ router.put('/:id', jsonParser, (req, res) => {
 });
 
 router.delete('/:id', (req, res) => {
-    Trip.findByIdAndDelete(req.params.id)
-    .then(res.status(204).end())
+    const eventDelete = Event.deleteMany({trip: req.params.id, user: req.user.username})
+    const tripDelete = Trip.deleteOne({_id: req.params.id})
+    Promise.all([eventDelete, tripDelete]).then(res.status(204).end())
     .catch(err => {
         console.error(err);
         res.status(500).json({message: 'Internal Server Error'});

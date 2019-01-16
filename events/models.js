@@ -27,15 +27,18 @@ const EventSchema = mongoose.Schema({
 });
 
 EventSchema.methods.serialize = function () {
-    return {
+    const event = {
         id: this._id,
         name: this.name,
-        dateTime: this.dateTime.toDateString(),
         location: this.location,
         description: this.description,
         image: this.image,
         trip: this.trip
     };
+    if (this.dateTime) {
+        event.dateTime = this.dateTime.toDateString();
+    }
+    return event;
 }
 
 const Event = mongoose.model('Event', EventSchema);

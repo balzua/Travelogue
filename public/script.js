@@ -164,7 +164,7 @@ function displaySignUpForm() {
  ****************************/
 
 function displayTrips() {
-    $('.content').html('');
+    $('.content').html('<div class="trip-grid"></div>');
     $('.options').html('<h2>My Trips</h2><a href="javascript:displayAddTripForm()">Add Trip</a>');
     fetch('/trips', {
         headers: {
@@ -174,7 +174,7 @@ function displayTrips() {
     .then(res => res.json())
     .then(trips => {
         trips.forEach(trip => {
-            $('.content').append(`
+            $('.trip-grid').append(`
             <div class="grid-item">
                 <div class="trip-content" data="${trip.id}">
                     <div class="panel-text">
@@ -189,14 +189,13 @@ function displayTrips() {
                 </div>
             </div>
             `);
-            $('.content').children().last().css("background-image", "url('" + trip.background + "')");
+            $('.trip-grid').children('.grid-item').last().css("background-image", "url('" + trip.background + "')");
         });
     });
 }
 
 function displayEvents(tripId) {
-    console.log("Switching to Event View");
-    $('.content').html('');
+    $('.content').html('<div class="event-grid"></div>');
     const eventPromise = fetch(`/events?trip=${tripId}`, {
         headers: {
             "Authorization": `Bearer ${token}`
@@ -213,6 +212,7 @@ function displayEvents(tripId) {
         const trip = data[1];
         $('.options').html(`
             <h2>${trip.name}</h2>
+            <span class="event-trip-location">${trip.location}</span><br><br>
             <a href="javascript:displayAddEventForm('${trip.name}', '${trip.id}')">Add Event</a>
             <a href="javascript:displayTrips()">All Trips</a>
         `);
@@ -221,22 +221,37 @@ function displayEvents(tripId) {
         }
         console.log(events);
         events.forEach(event => {
-            $('.content').append(`
-            <div class="grid-item">
-                <div class="trip-content" data="${event.id}">
-                <div class="panel-text">
-                    <span class="trip-name">${event.name}</a></span><br>
-                    <span class="trip-location">${event.location}</span><br>
-                    <span class="trip-dates">${event.dateTime}</span><br>
+            console.log(event);
+            $('.event-grid').append(`
+            <div class="event-item" data="${event.id}">
+            </div>
+            `);
+            if (event.image) {
+                $(`.event-item[data="${event.id}"]`).append(`
+                <div class="event-image">
+                <img src="${event.image}">
                 </div>
-                    <div class="panel-controls">
+                `);
+            }
+            $(`.event-item[data="${event.id}"]`).append(`
+                <div class="event-content">
+                    <div class="event-text">
+                        <span class="event-name">${event.name}</a></span><br>
+                        <span class="event-location">${event.location}</span><br>
+                    </div>
+                    <div class="event-controls">
                         <button class="js-edit-event">Edit</button>
                         <button class="js-delete-event">Delete</button>
                     </div>
                 </div>
             </div>
             `);
-            $('.content').children().last().css("background-image", "url('" + event.image + "')");
+            if (event.dateTime) {
+                $(`.event-item[data="${event.id}"]`).find('.event-text').append(event.dateTime);
+            }
+            if (event.description) {
+                $(`.event-item[data="${event.id}"]`).find('.event-text').append(`<p>${event.description}</p>`);
+            }
         });
         $('.content').attr('data', trip.id);
     });

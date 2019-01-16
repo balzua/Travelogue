@@ -18,7 +18,12 @@ h1 {
 h2 {
     font-family: 'Permanent Marker', cursive;
     font-size: 38px;
-    margin: 0 0 0.1em 0;
+    margin: 0 0 0.05em 0;
+}
+
+.event-trip-location {
+    font-size: 18px;
+    font-style: italic;
 }
 
 .userinfo a {
@@ -66,8 +71,49 @@ input, button, textarea {
     box-shadow: 5px 5px 50px #000;
 }
 
+.event-item {
+    color: black;
+    box-shadow: 3px 3px 20px #000;
+    border-radius: 10px;
+    border: 1px solid black;
+    display: flex;
+    flex-direction: column;
+    margin: 0.2em;
+    background-color: white;
+}
+
+.event-image img {
+    height: 400px;
+    width: 100%;
+    object-fit: cover;
+    border-radius: 10px 10px 0px 0px;
+    border-bottom: 2px solid black;
+}
+
+.event-content {
+    padding: 10px 10px 10px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
 .grid-item a {
     color: white;
+}
+
+.panel-content {
+    padding: 30px 10px 10px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.event-name {
+    font-weight: bold;
+    text-decoration: underline;
+    font-size: 20px;
 }
 
 .trip-content {

@@ -27,7 +27,6 @@ const TripSchema = mongoose.Schema({
         type: String,
         required: true
     }
-    //events: [eventSchema]
 });
 
 

@@ -16,9 +16,16 @@
     #grid-container {
         grid-template-areas: 'head' 'content';
     }
-    .content {
-        grid-template-columns: auto auto;
+    .trip-grid {
+        grid-template-columns: 50% 50%;
     }
+    .event-grid {
+        grid-template-columns: 33.3% 33.3% 33.3%;
+    }
+}
+
+.trip-grid, .event-grid {
+    display: grid;
 }
 
 .userinfo {

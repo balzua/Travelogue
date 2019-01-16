@@ -24,14 +24,13 @@ router.post('/', jsonParser, (req, res) => {
     let missingFields = [];
     requiredFields.forEach(field => {
         if (!(field in req.body)) {
-            console.log(field);
             missingFields.push(field);
         }
     }); 
     if (missingFields.length > 0) {
         return res.status(400).json({message: `Missing fields: ${missingFields.join(' ')}`});
     }
-    Trip.findById(req.body.trip)
+    Trip.findOne({_id: req.body.trip})
     .then(trip => {
         if (trip.user != req.user.username) { 
             return res.status(401).json({message: 'Unauthorized: trip does not belong to you'});
