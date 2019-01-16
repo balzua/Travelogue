@@ -1,5 +1,6 @@
 # Travelogue
 ## https://balzua-travelogue.herokuapp.com/
+**Demo Account**: Username: **demo** Password: **demo**
 
 ### Description
 This is a web app to log one's travel/vacation history and memorialize trips they took and things they experienced while on those trips.
