@@ -183,8 +183,8 @@ function displayTrips() {
                         <span class="trip-dates">${trip.startDate} - ${trip.endDate}</span><br>
                     </div>
                     <div class="panel-controls">
-                        <button class="js-show-edit-trip-form"><img src="/assets/icons8-edit-16.png"> Edit</button>
-                        <button class="js-delete-trip"><img src="/assets/icons8-trash-can-16.png"> Delete</button>
+                        <button class="js-show-edit-event-form"><img src="/assets/icons8-edit-16.png"> Edit</button>
+                        <button class="js-delete-event"><img src="/assets/icons8-trash-can-16.png"> Delete</button>
                     </div>
                 </div>
             </div>
@@ -219,9 +219,7 @@ function displayEvents(tripId) {
         if (events.length === 0) {
             $('.options').append('<br>No events yet. <a href="javascript:displayAddEventForm()">Add One?</a>');
         }
-        console.log(events);
         events.forEach(event => {
-            console.log(event);
             $('.event-grid').append(`
             <div class="event-item" data="${event.id}">
             </div>
@@ -233,6 +231,13 @@ function displayEvents(tripId) {
                 </div>
                 `);
             }
+            else {
+                $(`.event-item[data="${event.id}"]`).append(`
+                <div class="event-image">
+                <img src="${trip.background}">
+                </div>
+                `);
+            }
             $(`.event-item[data="${event.id}"]`).append(`
                 <div class="event-content">
                     <div class="event-text">
@@ -240,8 +245,8 @@ function displayEvents(tripId) {
                         <span class="event-location">${event.location}</span><br>
                     </div>
                     <div class="event-controls">
-                        <button class="js-edit-event">Edit</button>
-                        <button class="js-delete-event">Delete</button>
+                        <button class="js-edit-event"><img src="/assets/icons8-edit-16.png">Edit</button>
+                        <button class="js-delete-event"><img src="/assets/icons8-trash-can-16.png">Delete</button>
                     </div>
                 </div>
             </div>
@@ -400,12 +405,10 @@ function addTrip() {
     .then(parseJSON)
     .then(res => {
         if (res.ok) {
-            //TODO: Post successful - display feedback
             removeModal();
             displayTrips();
         } 
         else {
-            //TODO: Error handling
             console.log(res);
             throw new Error(res.json.message);
         }
@@ -429,11 +432,9 @@ function editTrip(tripId) {
     })
     .then(res => {
         if (res.ok) {
-            //TODO: Post successful - display feedback
             displayTrips();
         } 
         else {
-            //TODO: Error handling
             throw new Error(res.statusText);
         }
     })
@@ -441,19 +442,16 @@ function editTrip(tripId) {
 }
 
 function deleteTrip(tripId) {
-    //TODO: Add user confirmation behavior...
     fetch(`/trips/${tripId}`, {method: 'delete', headers: {"Authorization": `Bearer ${token}`}})
     .then(res => {
         if (res.ok) {
-            //Delete successful - display feedback
             displayTrips();
         }
         else {
-            //TODO: Better error handling
             throw new Error(res.statusText);
         }
     })
-    .catch('An error occurred');
+    .catch(console.log(`An error occurred: ${err.message}`));
 }
 
 function cancelDelete(panel) {
@@ -482,12 +480,10 @@ function addEvent(tripId) {
     .then(parseJSON)
     .then(res => {
         if (res.ok) {
-            //TODO: Post successful - display feedback
             removeModal();
             displayEvents(tripId);
         } 
         else {
-            //TODO: Error handling
             throw new Error(res.json.message);
         }
     })
@@ -507,11 +503,9 @@ function deleteEvent(eventId) {
             displayEvents(tripId);
         }
         else {
-            //TODO: Better error handling
             throw new Error(res.statusText);
         }
-    })
-    .catch('An error occurred');
+    });
 }
 
 function cancelEventDelete(panel) {
@@ -574,7 +568,7 @@ function eventListener() {
     });
     $('.content').on('click', '.delete-event', function(event) {
         event.preventDefault();
-        deleteEvent($(this).parents('.trip-content').attr('data'));
+        deleteEvent($(this).parents('.event-item').attr('data'));
     });
     $('.content').on('click', '.cancel-event-delete', function(event) {
         event.preventDefault();

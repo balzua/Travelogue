@@ -116,6 +116,17 @@ input, button, textarea {
     font-size: 20px;
 }
 
+.event-text p {
+    margin: 0.3em 0.5em 0 0;
+    padding-right: 5px;
+}
+
+.event-controls {
+    min-width: 160px;
+    padding-left: 20px;
+    display: flex;
+}
+
 .trip-content {
     background: linear-gradient(
         to bottom,
@@ -143,15 +154,15 @@ form.js-edit-trip-form {
     margin-bottom: 0;
 }
 
-.panel-controls {
+.panel-controls, .event-controls {
     visibility: hidden;
 }
 
-.panel-controls img {
+.panel-controls img, .event-controls img {
     vertical-align: middle;
 }
 
-.grid-item:hover .panel-controls {
+.grid-item:hover .panel-controls, .event-item:hover .event-controls {
     visibility: visible;
 }
 
