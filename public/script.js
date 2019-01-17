@@ -164,6 +164,10 @@ function displaySignUpForm() {
  ****************************/
 
 function displayTrips() {
+    //If user is not logged-in, immediately return to prevent trips from being reloaded.
+    if (!token) {
+        return;
+    }
     $('.content').html('<div class="trip-grid" aria-live="polite"></div>');
     $('.options').html('<h2>My Trips</h2><a href="javascript:displayAddTripForm()">Add Trip</a>');
     fetch('/trips', {
@@ -377,8 +381,8 @@ function displayAddEventForm(tripName, tripId) {
             <input type="text" placeholder="e.g. Eiffel Tower" name="location" id="location" required>
         </div>
         <div class="form-line">
-            <label for="dateTime">Date/Time</label>
-            <input type="text" placeholder="e.g. 6:00 10/29/2014" name="dateTime" id="dateTime">
+            <label for="dateTime">Date</label>
+            <input type="text" placeholder="10/29/2014" name="dateTime" id="dateTime">
         </div>
         <div class="form-line">
             <label for="image">Image URL</label>

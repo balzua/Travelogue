@@ -381,7 +381,6 @@ describe('Test Server', function () {
                     return Event.findById(updateData.id);
                 })
                 .then(updatedEvent => {
-                    console.log(updatedEvent._id);
                     expect(updateData.name).to.equal(updatedEvent.name);
                     expect(updateData.location).to.equal(updatedEvent.location);
                 });
