@@ -231,14 +231,14 @@ function displayEvents(tripId) {
             if (event.image) {
                 $(`.event-item[data="${event.id}"]`).append(`
                 <div class="event-image">
-                <img src="${event.image}">
+                    <img src="${event.image}">
                 </div>
                 `);
             }
             else {
                 $(`.event-item[data="${event.id}"]`).append(`
                 <div class="event-image">
-                <img src="${trip.background}">
+                    <img src="${trip.background}">
                 </div>
                 `);
             }
@@ -253,7 +253,6 @@ function displayEvents(tripId) {
                         <button class="js-delete-event"><img src="/assets/icons8-trash-can-16.png">Delete</button>
                     </div>
                 </div>
-            </div>
             `);
             if (event.dateTime) {
                 $(`.event-item[data="${event.id}"]`).find('.event-text').append(event.dateTime);
