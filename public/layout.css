@@ -76,6 +76,7 @@
     background-color: #efefef;
     text-align: center;
     font-weight: bold;
+    border-top: 1px solid black;
 }
 
 body {

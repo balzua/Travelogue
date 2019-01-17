@@ -164,7 +164,7 @@ function displaySignUpForm() {
  ****************************/
 
 function displayTrips() {
-    $('.content').html('<div class="trip-grid"></div>');
+    $('.content').html('<div class="trip-grid" aria-live="polite"></div>');
     $('.options').html('<h2>My Trips</h2><a href="javascript:displayAddTripForm()">Add Trip</a>');
     fetch('/trips', {
         headers: {
@@ -176,9 +176,9 @@ function displayTrips() {
         trips.forEach(trip => {
             $('.trip-grid').append(`
             <div class="grid-item">
-                <div class="trip-content" data="${trip.id}">
+                <div class="trip-content" data="${trip.id}" aria-live="polite">
                     <div class="panel-text">
-                        <span class="trip-name"><a href="javascript:displayEvents('${trip.id}')">${trip.name}</a></span><br>
+                        <span class="trip-name"><a href="javascript:displayEvents('${trip.id}')">${trip.name} →</a></span><br>
                         <span class="trip-location">${trip.location}</span><br>
                         <span class="trip-dates">${trip.startDate} - ${trip.endDate}</span><br>
                     </div>
@@ -195,7 +195,7 @@ function displayTrips() {
 }
 
 function displayEvents(tripId) {
-    $('.content').html('<div class="event-grid"></div>');
+    $('.content').html('<div class="event-grid" aria-live="polite"></div>');
     const eventPromise = fetch(`/events?trip=${tripId}`, {
         headers: {
             "Authorization": `Bearer ${token}`
@@ -221,7 +221,7 @@ function displayEvents(tripId) {
         }
         events.forEach(event => {
             $('.event-grid').append(`
-            <div class="event-item" data="${event.id}">
+            <div class="event-item" data="${event.id}" aria-live="polite">
             </div>
             `);
             if (event.image) {
@@ -284,7 +284,7 @@ function displayEditForm(tripId, panel) {
     .then(res => res.json())
     .then(resJson => {
         $(`.trip-content[data=${tripId}]`).children('.panel-text').html(`
-            <form class="js-edit-trip-form" data="${tripId}">
+            <form class="js-edit-trip-form" data="${tripId}" aria-live="polite">
                 <input type="text" placeholder="Name" name="name" value="${resJson.name}"><br>
                 <input type="text" placeholder="Location" name="location" value="${resJson.location}"><br>
                 <input type="datetime" placeholder="Start Date" name="startDate" value="${resJson.startDate}">
@@ -310,7 +310,7 @@ function displayEditEventForm(eventId, panel) {
     .then(res => res.json())
     .then(resJson => {
         $(`.event-item[data=${eventId}]`).find('.event-text').html(`
-            <form class="js-edit-event-form" data="${eventId}">
+            <form class="js-edit-event-form" data="${eventId}" aria-live="polite">
                 <input type="text" placeholder="Name" name="name" value="${resJson.name}"><br>
                 <input type="text" placeholder="Location" name="location" value="${resJson.location}"><br>
                 <input type="datetime" placeholder="Date/Time" name="dateTime" value="${resJson.dateTime || ''}"><br>
@@ -330,7 +330,7 @@ function displayAddTripForm() {
     $('.modal-content').html(`
     <div class="pane"><img src="/assets/panes/new-trip.jpg"></div>
     <h2>Add Trip</h2>
-    <form id="js-trip-add-form" action="javascript:addTrip()">
+    <form id="js-trip-add-form" action="javascript:addTrip()" aria-live="polite">
         <div class="modal-error">
         </div>
         <div class="form-line">
@@ -365,7 +365,7 @@ function displayAddEventForm(tripName, tripId) {
     <div class="pane"><img src="/assets/panes/new-event.jpg"></div>
     <h2>Add Event</h2>
     Adding event to ${tripName}<br>
-    <form id="js-add-event-form" action="javascript:addEvent('${tripId}')">
+    <form id="js-add-event-form" action="javascript:addEvent('${tripId}')" aria-live="polite">
         <div class="modal-error">
         </div>
         <div class="form-line">
